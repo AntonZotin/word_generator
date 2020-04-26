@@ -85,7 +85,7 @@ def main_generate_word(name, inn, number, date, has_comment, comment):
 
 
 def main():
-    with open(COMMENTS_FILE, 'r') as t:
+    with open(COMMENTS_FILE, 'a+') as t:
         comments_file = t.read().strip()
         comments_array = [e.strip() for e in filter(lambda el: el, comments_file.split(END_OF_COMMENT))] if comments_file else []
     layout = [
@@ -155,7 +155,7 @@ def main():
 
             if not required_errors:
                 if comment not in comments_array:
-                    with open(COMMENTS_FILE, 'a') as f:
+                    with open(COMMENTS_FILE, 'a+') as f:
                         f.write('%s%s\n' % (comment, END_OF_COMMENT))
                     comments_array.append(comment)
                 main_generate_word(name, inn, number, date, has_comment, comment)
