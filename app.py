@@ -36,6 +36,8 @@ footer = 'Дата: '
 
 HAS_NO_COMMENT = 'Соответствует'
 HAS_COMMENT = 'Не соответствует'
+END_OF_COMMENT = '<END_OF_COMMENT>'
+COMMENTS_FILE = 'templates.txt'
 
 
 def main_generate_word(name, inn, number, date, has_comment, comment):
@@ -83,6 +85,9 @@ def main_generate_word(name, inn, number, date, has_comment, comment):
 
 
 def main():
+    with open(COMMENTS_FILE, 'r') as t:
+        comments_file = t.read().strip()
+        comments_array = [e.strip() for e in filter(lambda el: el, comments_file.split(END_OF_COMMENT))] if comments_file else []
     layout = [
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
@@ -92,16 +97,40 @@ def main():
         [Gui.Text('Соответствие заявки', size=(20, 1)), Gui.Combo([HAS_NO_COMMENT, HAS_COMMENT], size=(40, 1),
                                                                   readonly=True, key='has_comment')],
         [Gui.Text('Комментарий', size=(20, 1)), Gui.Multiline(size=(40, 10), key='comment')],
+        [Gui.Text('Шаблон комментария', size=(20, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
         [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Сгенерировать')]
     ]
 
     window = Gui.Window('Word generator', layout)
 
+    templates_active = False
     while True:
-        event, values = window.read()
+        event, values = window.read(timeout=100)
         print(event, values)
-        if event in (None, 'Exit', 'Cancel'):
+        if event in (None, 'Exit', 'Cancel', 'Закрыть'):
             return 0
+        elif templates_active:
+            template_event, template_values = template_window.Read(timeout=100)
+            if template_event in (None, 'Exit', 'Cancel'):
+                templates_active = False
+                template_window.close()
+            elif template_event == 'Select template':
+                try:
+                    window['comment'].update(template_values['template'][0])
+                    templates_active = False
+                    template_window.close()
+                except IndexError:
+                    Gui.popup('Вы не выбрали шаблон', title='')
+        elif not templates_active and event == 'template':
+            if values['has_comment'] == HAS_COMMENT:
+                templates_active = True
+                template_layout = [
+                    [Gui.Listbox([*comments_array], size=(100, 30), key='template')],
+                    [Gui.Text('', size=(36, 1)), Gui.Submit(button_text='Выбрать', key='Select template'),
+                     Gui.Submit(button_text='Закрыть', key='Cancel')]]
+                template_window = Gui.Window('Выбор шаблона', template_layout)
+            else:
+                Gui.popup('Выбери соответствие заявки: Не соответствует', title='Статус заявки')
         elif event in numeric_fields and values[event] and values[event][-1] not in '0123456789':
             window[event].update(values[event][:-1])
         elif event == 'date' and values[event]:
@@ -125,6 +154,10 @@ def main():
             if not comment and has_comment: required_errors.append(required_fields['comment'])
 
             if not required_errors:
+                if comment not in comments_array:
+                    with open(COMMENTS_FILE, 'a') as f:
+                        f.write('%s%s\n' % (comment, END_OF_COMMENT))
+                    comments_array.append(comment)
                 main_generate_word(name, inn, number, date, has_comment, comment)
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')

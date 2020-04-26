@@ -6,4 +6,4 @@
 
 # Сборка
 
-1. pyinstaller --onefile --windowed app.py
+1. pyinstaller --hidden-import python-docx, --hiddenimport PySimpleGUI --windowed --onefile app.py
