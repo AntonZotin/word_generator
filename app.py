@@ -12,6 +12,8 @@ required_fields = {
     'inn': 'ИНН',
     'number': 'Номер заявки',
     'date': 'Дата заявки',
+    'ispolnitel': 'Исполнитель',
+    'postanovlenie': 'Постановление',
     'has_comment': 'Соответствие заявки',
     'comment': 'Комментарий',
 }
@@ -24,14 +26,28 @@ text1 = 'Юридическим отделом государственного 
 text2 = ' (ИНН '
 text3 = ') № '
 text4 = ' от '
-text5 = ' на предмет соответствия требованиям Порядка предоставления субсидий на возмещение ' \
-       'затрат, связанных с уплатой процентов по кредитам, привлеченным в российских кредитных организациях, ' \
-       'утвержденного постановлением Кабинета Министров Республики Татарстан от 24.09.2019 № 873 «Об утверждении ' \
-       'Порядка предоставления субсидий на возмещение затрат, связанных с уплатой процентов по кредитам, привлеченным ' \
-       'в российских кредитных организациях» (далее – Порядок).'
+text5 = ' на предмет соответствия требованиям '
+text6 = ' (далее – Порядок).'
+postanovleniya = {
+    '№ 327': 'Порядка предоставления субсидий на возмещение части затрат, связанных с уплатой процентов по кредитам, '
+             'привлеченным в российских кредитных организациях, утвержденного постановлением Кабинета Министров '
+             'Республики Татарстан от 25.04.2020 № 327 «Об утверждении Порядка предоставления субсидий на возмещение '
+             'части затрат, связанных с уплатой процентов по кредитам, привлеченным в российских кредитных '
+             'организациях»',
+    '№ 326': 'Порядка предоставления субсидий из бюджета Республики Татарстан в целях возмещения затрат субъектов '
+             'малого и среднего предпринимательства, связанных с оплатой услуг (комиссии) сервисов с доставкой '
+             'продуктов питания и еду, утвержденного постановлением Кабинета Министров Республики Татарстан от '
+             '25.04.2020 № 326 «Об утверждении Порядка предоставления субсидий из бюджета Республики Татарстан в '
+             'целях возмещения затрат субъектов малого и среднего предпринимательства, связанных с оплатой услуг ('
+             'комиссии) сервисов с доставкой продуктов питания и еду»'
+}
 success = 'По итогам проверки замечания не выявлены.'
 fail = 'По итогам проверки выявлены следующие замечания:'
-specialist = 'Главный специалист						              Е.Р. Зотина'
+specialists = {
+    'Е.Р. Зотина': 'Главный специалист						              Е.Р. Зотина',
+    'М.Р. Галиев': 'Главный специалист						             М.Р. Галиев',
+    'Д.З. Соловьев': 'Главный специалист						          Д.З. Соловьев'
+}
 footer = 'Дата: '
 
 HAS_NO_COMMENT = 'Соответствует'
@@ -40,13 +56,14 @@ END_OF_COMMENT = '<END_OF_COMMENT>'
 COMMENTS_FILE = 'templates.txt'
 
 
-def main_generate_word(name, inn, number, date, has_comment, comment):
+def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
     if has_comment == HAS_COMMENT:
         comment = comment.replace("\n", "\t\n" + tab)
-    paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{number}{text4}{date}{text5}\t\n' \
+    paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{number}{text4}{date}{text5}' \
+        f'{postanovleniya[postanovlenie]}{text6}\t\n' \
         f'{tab}{fail if has_comment == HAS_COMMENT else success}\t\n' \
         f'{tab}{comment if has_comment == HAS_COMMENT else ""}\t\n'
-    paragraph2 = f'{specialist}\n\n\n'
+    paragraph2 = f'{specialists[ispolnitel]}\n\n\n'
     paragraph3 = f'{footer}{datetime.today().strftime("%d.%m.%Y")}'
 
     document = Document()
@@ -93,6 +110,10 @@ def main():
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
         [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
         [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='date', enable_events=True)],
+        [Gui.Text('Исполнитель', size=(20, 1)), Gui.Combo([*specialists.keys()], size=(40, 1),
+                                                          readonly=True, key='ispolnitel')],
+        [Gui.Text('Постановление', size=(20, 1)), Gui.Combo([*postanovleniya.keys()], size=(40, 1),
+                                                          readonly=True, key='postanovlenie')],
         [Gui.Text('_' * 68)],
         [Gui.Text('Соответствие заявки', size=(20, 1)), Gui.Combo([HAS_NO_COMMENT, HAS_COMMENT], size=(40, 1),
                                                                   readonly=True, key='has_comment')],
@@ -148,17 +169,21 @@ def main():
             if not number: required_errors.append(required_fields['number'])
             date = values['date']
             if not date: required_errors.append(required_fields['date'])
+            ispolnitel = values['ispolnitel']
+            if not ispolnitel: required_errors.append(required_fields['ispolnitel'])
+            postanovlenie = values['postanovlenie']
+            if not postanovlenie: required_errors.append(required_fields['postanovlenie'])
             has_comment = values['has_comment']
             if not has_comment: required_errors.append(required_fields['has_comment'])
             comment = values['comment'].strip()
-            if not comment and has_comment: required_errors.append(required_fields['comment'])
+            if not comment and has_comment == HAS_COMMENT: required_errors.append(required_fields['comment'])
 
             if not required_errors:
-                if comment not in comments_array:
+                if comment and comment not in comments_array:
                     with open(COMMENTS_FILE, 'a+') as f:
                         f.write('%s%s\n' % (comment, END_OF_COMMENT))
                     comments_array.append(comment)
-                main_generate_word(name, inn, number, date, has_comment, comment)
+                main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment)
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
 
