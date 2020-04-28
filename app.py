@@ -115,14 +115,20 @@ def main():
         [Gui.Text('Постановление', size=(20, 1)), Gui.Combo([*postanovleniya.keys()], size=(40, 1),
                                                           readonly=True, key='postanovlenie')],
         [Gui.Text('_' * 68)],
+        [Gui.Text('Соответствие заявки', size=(20, 1)),
+         Gui.Radio(HAS_NO_COMMENT, default=True, group_id='1', key=HAS_NO_COMMENT),
+         Gui.Radio(HAS_COMMENT, default=False,  group_id='1', key=HAS_COMMENT)],
         [Gui.Text('Соответствие заявки', size=(20, 1)), Gui.Combo([HAS_NO_COMMENT, HAS_COMMENT], size=(40, 1),
                                                                   readonly=True, key='has_comment')],
-        [Gui.Text('Комментарий', size=(20, 1)), Gui.Multiline(size=(40, 10), key='comment')],
+        [Gui.Text('Комментарий', size=(20, 1)), Gui.Multiline(size=(40, 10), key='comment', disabled=True)],
         [Gui.Text('Шаблон комментария', size=(20, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
         [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Сгенерировать')]
     ]
 
-    window = Gui.Window('Word generator', layout)
+    window = Gui.Window('Word generator', layout, finalize=True)
+
+    window[HAS_NO_COMMENT].bind('<Button-1>', '')
+    window[HAS_COMMENT].bind('<Button-1>', '')
 
     templates_active = False
     while True:
@@ -152,6 +158,10 @@ def main():
                 template_window = Gui.Window('Выбор шаблона', template_layout)
             else:
                 Gui.popup('Выбери соответствие заявки: Не соответствует', title='Статус заявки')
+        elif event == HAS_NO_COMMENT:
+            window['comment'].update('', disabled=True)
+        elif event == HAS_COMMENT:
+            window['comment'].update(disabled=False)
         elif event in numeric_fields and values[event] and values[event][-1] not in '0123456789':
             window[event].update(values[event][:-1])
         elif event == 'date' and values[event]:
