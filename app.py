@@ -57,12 +57,12 @@ COMMENTS_FILE = 'templates.txt'
 
 
 def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
-    if has_comment == HAS_COMMENT:
+    if has_comment:
         comment = comment.replace("\n", "\t\n" + tab)
     paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{number}{text4}{date}{text5}' \
         f'{postanovleniya[postanovlenie]}{text6}\t\n' \
-        f'{tab}{fail if has_comment == HAS_COMMENT else success}\t\n' \
-        f'{tab}{comment if has_comment == HAS_COMMENT else ""}\t\n'
+        f'{tab}{fail if has_comment else success}\t\n' \
+        f'{tab}{comment if has_comment else ""}\t\n'
     paragraph2 = f'{specialists[ispolnitel]}\n\n\n'
     paragraph3 = f'{footer}{datetime.today().strftime("%d.%m.%Y")}'
 
@@ -118,8 +118,6 @@ def main():
         [Gui.Text('Соответствие заявки', size=(20, 1)),
          Gui.Radio(HAS_NO_COMMENT, default=True, group_id='1', key=HAS_NO_COMMENT),
          Gui.Radio(HAS_COMMENT, default=False,  group_id='1', key=HAS_COMMENT)],
-        [Gui.Text('Соответствие заявки', size=(20, 1)), Gui.Combo([HAS_NO_COMMENT, HAS_COMMENT], size=(40, 1),
-                                                                  readonly=True, key='has_comment')],
         [Gui.Text('Комментарий', size=(20, 1)), Gui.Multiline(size=(40, 10), key='comment', disabled=True)],
         [Gui.Text('Шаблон комментария', size=(20, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
         [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Сгенерировать')]
@@ -183,17 +181,15 @@ def main():
             if not ispolnitel: required_errors.append(required_fields['ispolnitel'])
             postanovlenie = values['postanovlenie']
             if not postanovlenie: required_errors.append(required_fields['postanovlenie'])
-            has_comment = values['has_comment']
-            if not has_comment: required_errors.append(required_fields['has_comment'])
             comment = values['comment'].strip()
-            if not comment and has_comment == HAS_COMMENT: required_errors.append(required_fields['comment'])
+            if not comment and values[HAS_COMMENT]: required_errors.append(required_fields['comment'])
 
             if not required_errors:
                 if comment and comment not in comments_array:
                     with open(COMMENTS_FILE, 'a+') as f:
                         f.write('%s%s\n' % (comment, END_OF_COMMENT))
                     comments_array.append(comment)
-                main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment)
+                main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, values[HAS_COMMENT], comment)
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
 
