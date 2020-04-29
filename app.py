@@ -81,33 +81,30 @@ def get_str_date(ws, row):
 
 def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel):
     try:
-        try:
-            document = load_workbook(XLSX_FILE)
-        except FileNotFoundError:
-            document = load_workbook('template/%s' % XLSX_FILE)
-        ws = document.active
-        rows = [[name, inn, number, date, ispolnitel], ]
-        empty_row = 0
-        for row in ws[XLSX_NAME]:
-            if row.row == 1:
-                continue
-            elif not row.value:
-                empty_row = row.row
-                break
-            else:
-                rows.append([
-                    ws[f'{XLSX_NAME}{row.row}'].value,
-                    ws[f'{XLSX_INN}{row.row}'].value,
-                    ws[f'{XLSX_NUMBER}{row.row}'].value,
-                    get_str_date(ws, row),
-                    ws[f'{XLSX_ISPOLNITEL}{row.row}'].value
-                ])
-        sorted_rows = sorted(rows, key=lambda r: r[2])
-        for row in range(empty_row - 1):
-            insert_values_in_row(ws, sorted_rows[row], row + 2)
-        document.save(XLSX_FILE)
-    except Exception as e:
-        a = 0
+        document = load_workbook(XLSX_FILE)
+    except FileNotFoundError:
+        document = load_workbook('template/%s' % XLSX_FILE)
+    ws = document.active
+    rows = [[name, inn, number, date, ispolnitel], ]
+    empty_row = 0
+    for row in ws[XLSX_NAME]:
+        if row.row == 1:
+            continue
+        elif not row.value:
+            empty_row = row.row
+            break
+        else:
+            rows.append([
+                ws[f'{XLSX_NAME}{row.row}'].value,
+                ws[f'{XLSX_INN}{row.row}'].value,
+                ws[f'{XLSX_NUMBER}{row.row}'].value,
+                get_str_date(ws, row),
+                ws[f'{XLSX_ISPOLNITEL}{row.row}'].value
+            ])
+    sorted_rows = sorted(rows, key=lambda r: r[2])
+    for row in range(empty_row - 1):
+        insert_values_in_row(ws, sorted_rows[row], row + 2)
+    document.save(XLSX_FILE)
 
 
 def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
