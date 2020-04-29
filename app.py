@@ -44,9 +44,9 @@ postanovleniya = {
 success = 'По итогам проверки замечания не выявлены.'
 fail = 'По итогам проверки выявлены следующие замечания:'
 specialists = {
-    'Е.Р. Зотина': 'Главный специалист						               Е.Р.Зотина',
-    'М.Р. Галиев': 'Главный специалист						              М.Р.Галиев',
-    'Д.З. Соловьев': 'Главный специалист						           Д.З.Соловьев'
+    'Е.Р. Зотина': 'Главный специалист						                             Е.Р.Зотина',
+    'М.Р. Галиев': 'Главный специалист						                           М.Р.Галиев',
+    'Д.З. Соловьев': 'Главный специалист						                        Д.З.Соловьев'
 }
 footer = 'Дата: '
 
@@ -75,7 +75,7 @@ def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_c
     obj_font.name = 'Times New Roman'
     obj_charstyle = obj_styles.add_style('Middle paragraph', WD_STYLE_TYPE.CHARACTER)
     obj_font = obj_charstyle.font
-    obj_font.size = Pt(12)
+    obj_font.size = Pt(14)
     obj_font.name = 'Times New Roman'
     obj_charstyle = obj_styles.add_style('Last paragraph', WD_STYLE_TYPE.CHARACTER)
     obj_font = obj_charstyle.font
@@ -147,7 +147,7 @@ def main():
                 except IndexError:
                     Gui.popup('Вы не выбрали шаблон', title='')
         elif not templates_active and event == 'template':
-            if values['has_comment'] == HAS_COMMENT:
+            if values[HAS_COMMENT]:
                 templates_active = True
                 template_layout = [
                     [Gui.Listbox([*comments_array], size=(100, 30), key='template')],
