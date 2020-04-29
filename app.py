@@ -80,10 +80,7 @@ def get_str_date(ws, row):
 
 
 def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel):
-    try:
-        document = load_workbook(XLSX_FILE)
-    except FileNotFoundError:
-        document = load_workbook('template/%s' % XLSX_FILE)
+    document = load_workbook(XLSX_FILE)
     ws = document.active
     rows = [[name, inn, number, date, ispolnitel], ]
     empty_row = 0
