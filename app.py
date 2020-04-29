@@ -5,7 +5,9 @@ from docx import Document
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
-from datetime import datetime
+from datetime import datetime, date
+
+from openpyxl import Workbook, load_workbook
 
 required_fields = {
     'name': 'Наименование компании',
@@ -54,6 +56,58 @@ HAS_NO_COMMENT = 'Соответствует'
 HAS_COMMENT = 'Не соответствует'
 END_OF_COMMENT = '<END_OF_COMMENT>'
 COMMENTS_FILE = 'templates.txt'
+
+XLSX_FILE = 'Реестр заявок.xlsx'
+XLSX_NAME = 'D'
+XLSX_INN = 'E'
+XLSX_NUMBER = 'F'
+XLSX_DATE = 'G'
+XLSX_ISPOLNITEL = 'H'
+
+
+def insert_values_in_row(ws, values, row):
+    ws[f'{XLSX_NAME}{row}'].value = values[0]
+    ws[f'{XLSX_INN}{row}'].value = values[1]
+    ws[f'{XLSX_NUMBER}{row}'].value = values[2]
+    ws[f'{XLSX_DATE}{row}'].value = values[3]
+    ws[f'{XLSX_ISPOLNITEL}{row}'].value = values[4]
+
+
+def get_str_date(ws, row):
+    return str(ws[f'{XLSX_DATE}{row.row}'].value.strftime("%d.%m.%Y")) \
+        if isinstance(ws[f'{XLSX_DATE}{row.row}'].value, datetime) \
+           or isinstance(ws[f'{XLSX_DATE}{row.row}'].value, date) else ws[f'{XLSX_DATE}{row.row}'].value
+
+
+def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel):
+    try:
+        try:
+            document = load_workbook(XLSX_FILE)
+        except FileNotFoundError:
+            document = load_workbook('template/%s' % XLSX_FILE)
+        ws = document.active
+        rows = [[name, inn, number, date, ispolnitel], ]
+        empty_row = 0
+        for row in ws[XLSX_NAME]:
+            if row.row == 1:
+                continue
+            elif not row.value:
+                empty_row = row.row
+                break
+            else:
+                rows.append([
+                    ws[f'{XLSX_NAME}{row.row}'].value,
+                    ws[f'{XLSX_INN}{row.row}'].value,
+                    ws[f'{XLSX_NUMBER}{row.row}'].value,
+                    get_str_date(ws, row),
+                    ws[f'{XLSX_ISPOLNITEL}{row.row}'].value
+                ])
+        sorted_rows = sorted(rows, key=lambda r: r[2])
+        for row in range(empty_row - 1):
+            insert_values_in_row(ws, sorted_rows[row], row + 2)
+        document.save(XLSX_FILE)
+    except Exception as e:
+        a = 0
 
 
 def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
@@ -104,7 +158,8 @@ def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_c
 def main():
     with open(COMMENTS_FILE, 'a+') as t:
         comments_file = t.read().strip()
-        comments_array = [e.strip() for e in filter(lambda el: el, comments_file.split(END_OF_COMMENT))] if comments_file else []
+        comments_array = [e.strip() for e in
+                          filter(lambda el: el, comments_file.split(END_OF_COMMENT))] if comments_file else []
     layout = [
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
@@ -113,11 +168,11 @@ def main():
         [Gui.Text('Исполнитель', size=(20, 1)), Gui.Combo([*specialists.keys()], size=(40, 1),
                                                           readonly=True, key='ispolnitel')],
         [Gui.Text('Постановление', size=(20, 1)), Gui.Combo([*postanovleniya.keys()], size=(40, 1),
-                                                          readonly=True, key='postanovlenie')],
+                                                            readonly=True, key='postanovlenie')],
         [Gui.Text('_' * 68)],
         [Gui.Text('Соответствие заявки', size=(20, 1)),
          Gui.Radio(HAS_NO_COMMENT, default=True, group_id='1', key=HAS_NO_COMMENT),
-         Gui.Radio(HAS_COMMENT, default=False,  group_id='1', key=HAS_COMMENT)],
+         Gui.Radio(HAS_COMMENT, default=False, group_id='1', key=HAS_COMMENT)],
         [Gui.Text('Комментарий', size=(20, 1)), Gui.Multiline(size=(40, 10), key='comment', disabled=True)],
         [Gui.Text('Шаблон комментария', size=(20, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
         [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Сгенерировать')]
@@ -190,6 +245,7 @@ def main():
                         f.write('%s%s\n' % (comment, END_OF_COMMENT))
                     comments_array.append(comment)
                 main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, values[HAS_COMMENT], comment)
+                main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel)
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
 

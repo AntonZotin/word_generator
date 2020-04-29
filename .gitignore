@@ -3,6 +3,7 @@ venv
 dist
 build
 *.docx
+*.xlsx
 *.spec
 __pycache__
 templates.txt

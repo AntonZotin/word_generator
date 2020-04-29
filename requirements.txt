@@ -1,2 +1,3 @@
 PySimpleGUI
 python-docx
+openpyxl
