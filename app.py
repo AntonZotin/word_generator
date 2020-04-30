@@ -57,7 +57,8 @@ HAS_COMMENT = 'Не соответствует'
 END_OF_COMMENT = '<END_OF_COMMENT>'
 COMMENTS_FILE = 'templates.txt'
 
-XLSX_FILE = 'Реестр заявок.xlsx'
+XLSX_FILE_PREFIX = 'Реестр заявок №'
+XLSX_FILE_SUFFIX = '.xlsx'
 XLSX_NAME = 'D'
 XLSX_INN = 'E'
 XLSX_NUMBER = 'F'
@@ -79,8 +80,10 @@ def get_str_date(ws, row):
            or isinstance(ws[f'{XLSX_DATE}{row.row}'].value, date) else ws[f'{XLSX_DATE}{row.row}'].value
 
 
-def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel):
-    document = load_workbook(XLSX_FILE)
+def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie):
+    number_post = '327' if postanovlenie == 'Процентная ставка' else '326'
+    document_name = f'{XLSX_FILE_PREFIX}{number_post}{XLSX_FILE_SUFFIX}'
+    document = load_workbook(document_name)
     ws = document.active
     rows = [[name, inn, number, date, ispolnitel], ]
     empty_row = 0
@@ -101,7 +104,7 @@ def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel):
     sorted_rows = sorted(rows, key=lambda r: r[2])
     for row in range(empty_row - 1):
         insert_values_in_row(ws, sorted_rows[row], row + 2)
-    document.save(XLSX_FILE)
+    document.save(document_name)
 
 
 def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
@@ -239,7 +242,7 @@ def main():
                         f.write('%s%s\n' % (comment, END_OF_COMMENT))
                     comments_array.append(comment)
                 main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, values[HAS_COMMENT], comment)
-                main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel)
+                main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie)
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
 
