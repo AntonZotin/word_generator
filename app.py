@@ -59,6 +59,7 @@ COMMENTS_FILE = 'templates.txt'
 
 XLSX_FILE_PREFIX = 'Реестр заявок №'
 XLSX_FILE_SUFFIX = '.xlsx'
+XLSX_PP = 'C'
 XLSX_NAME = 'D'
 XLSX_INN = 'E'
 XLSX_NUMBER = 'F'
@@ -82,17 +83,23 @@ def get_str_date(ws, row):
 
 def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie):
     number_post = '327' if postanovlenie == 'Процентная ставка' else '326'
+    number_prefix = 'П' if postanovlenie == 'Процентная ставка' else 'Д'
     document_name = f'{XLSX_FILE_PREFIX}{number_post}{XLSX_FILE_SUFFIX}'
     document = load_workbook(document_name)
     ws = document.active
-    rows = [[name, inn, number, date, ispolnitel], ]
-    empty_row = 0
+    new_row = [name, inn, f'{number_prefix}-{number}', date, ispolnitel]
+    rows = [new_row, ]
+    begin_row = 1
     for row in ws[XLSX_NAME]:
         if row.row == 1:
             continue
         elif not row.value:
-            empty_row = row.row
-            break
+            if ws[f'{XLSX_PP}{row.row}'].value:
+                break
+            else:
+                rows = [new_row, ]
+                begin_row = row.row
+                continue
         else:
             rows.append([
                 ws[f'{XLSX_NAME}{row.row}'].value,
@@ -102,8 +109,8 @@ def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie
                 ws[f'{XLSX_ISPOLNITEL}{row.row}'].value
             ])
     sorted_rows = sorted(rows, key=lambda r: r[2])
-    for row in range(empty_row - 1):
-        insert_values_in_row(ws, sorted_rows[row], row + 2)
+    for row in range(len(sorted_rows)):
+        insert_values_in_row(ws, sorted_rows[row], begin_row + row + 1)
     document.save(document_name)
 
 
