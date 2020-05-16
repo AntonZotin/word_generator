@@ -161,7 +161,7 @@ def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_c
 
 
 def main():
-    with open(COMMENTS_FILE, 'a+') as t:
+    with open(COMMENTS_FILE, 'r+') as t:
         comments_file = t.read().strip()
         comments_array = [e.strip() for e in
                           filter(lambda el: el, comments_file.split(END_OF_COMMENT))] if comments_file else []
