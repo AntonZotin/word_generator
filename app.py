@@ -44,7 +44,8 @@ postanovleniya = {
                 'комиссии) сервисов с доставкой продуктов питания и еду» '
 }
 success = 'По итогам проверки замечания не выявлены.'
-fail = 'По итогам проверки выявлены следующие замечания:'
+fail_single = 'По итогам проверки выявлены следующее замечание:'
+fail_multi = 'По итогам проверки выявлены следующие замечания:'
 specialists = {
     'Е.Р. Зотина': 'Главный специалист						                             Е.Р.Зотина',
     'М.Р. Галиев': 'Главный специалист						                           М.Р.Галиев',
@@ -115,8 +116,8 @@ def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie
 
 
 def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
-    if has_comment:
-        comment = comment.replace("\n", "\t\n" + tab)
+    fail = fail_multi if has_comment and "\n" in comment else fail_single
+    comment = comment.replace("\n", "\t\n" + tab) if has_comment else ''
     paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{number}{text4}{date}{text5}' \
         f'{postanovleniya[postanovlenie]}{text6}\t\n' \
         f'{tab}{fail if has_comment else success}\t\n' \
@@ -249,6 +250,8 @@ def main():
             comment = values['comment'].strip()
             window['comment'].update('')
             if not comment and values[HAS_COMMENT]: required_errors.append(required_fields['comment'])
+            window[HAS_COMMENT].update(False)
+            window[HAS_NO_COMMENT].update(True)
 
             if not required_errors:
                 if comment and comment not in comments_array:
