@@ -1,3 +1,4 @@
+import re
 import sys
 
 import PySimpleGUI as Gui
@@ -7,7 +8,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 from datetime import datetime, date
 
-from openpyxl import Workbook, load_workbook
+from openpyxl import load_workbook
 
 required_fields = {
     'name': 'Наименование компании',
@@ -80,6 +81,10 @@ def get_str_date(ws, row):
     return str(ws[f'{XLSX_DATE}{row.row}'].value.strftime("%d.%m.%Y")) \
         if isinstance(ws[f'{XLSX_DATE}{row.row}'].value, datetime) \
            or isinstance(ws[f'{XLSX_DATE}{row.row}'].value, date) else ws[f'{XLSX_DATE}{row.row}'].value
+
+
+def separate_comment(comment):
+    return [re.sub('^\d+[.)\s+]+', '', c) for c in comment.strip().split('\n')]
 
 
 def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie):
@@ -201,17 +206,21 @@ def main():
                 template_window.close()
             elif template_event == 'Select template':
                 try:
-                    window['comment'].update(template_values['template'][0])
+                    tv = list(filter(lambda k: template_values[k], template_values.keys()))
+                    window['comment'].update(re.sub('\n$', '', values['comment'], 1) + tv[0] + '\n')
                     templates_active = False
                     template_window.close()
+                    window['comment'].update(disabled=False)
                 except IndexError:
                     Gui.popup('Вы не выбрали шаблон', title='')
         elif not templates_active and event == 'template':
             if values[HAS_COMMENT]:
                 templates_active = True
                 template_layout = [
-                    [Gui.Listbox([*comments_array], size=(100, 30), key='template')],
-                    [Gui.Text('', size=(36, 1)), Gui.Submit(button_text='Выбрать', key='Select template'),
+                    [Gui.Col([[Gui.Radio(ca, default=False, group_id='2', key=ca,
+                                         text_color='black', background_color='white')] for ca in comments_array],
+                             background_color='white', size=(600, 500), scrollable=True)],
+                    [Gui.Text('', size=(30, 1)), Gui.Submit(button_text='Выбрать', key='Select template'),
                      Gui.Submit(button_text='Закрыть', key='Cancel')]]
                 template_window = Gui.Window('Выбор шаблона', template_layout)
             else:
@@ -255,9 +264,10 @@ def main():
 
             if not required_errors:
                 if comment and comment not in comments_array:
-                    with open(COMMENTS_FILE, 'a+') as f:
-                        f.write('%s%s\n' % (comment, END_OF_COMMENT))
-                    comments_array.append(comment)
+                    for c in separate_comment(comment):
+                        with open(COMMENTS_FILE, 'a+') as f:
+                            f.write('%s%s\n' % (c, END_OF_COMMENT))
+                        comments_array.append(c)
                 main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, values[HAS_COMMENT], comment)
                 main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie)
             else:
