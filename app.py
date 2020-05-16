@@ -229,18 +229,25 @@ def main():
         elif event == 'Сгенерировать':
             required_errors = []
             name = values['name']
+            window['name'].update('')
             if not name: required_errors.append(required_fields['name'])
             inn = values['inn']
+            window['inn'].update('')
             if not inn: required_errors.append(required_fields['inn'])
             number = values['number']
+            window['number'].update('')
             if not number: required_errors.append(required_fields['number'])
             date = values['date']
+            window['date'].update('')
             if not date: required_errors.append(required_fields['date'])
             ispolnitel = values['ispolnitel']
+            window['ispolnitel'].update('')
             if not ispolnitel: required_errors.append(required_fields['ispolnitel'])
             postanovlenie = values['postanovlenie']
+            window['postanovlenie'].update('')
             if not postanovlenie: required_errors.append(required_fields['postanovlenie'])
             comment = values['comment'].strip()
+            window['comment'].update('')
             if not comment and values[HAS_COMMENT]: required_errors.append(required_fields['comment'])
 
             if not required_errors:
