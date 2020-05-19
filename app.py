@@ -121,9 +121,10 @@ def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie
 
 
 def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
+    number_prefix = 'П' if postanovlenie == 'Процентная ставка' else 'Д'
     fail = fail_multi if has_comment and "\n" in comment else fail_single
     comment = comment.replace("\n", "\t\n" + tab) if has_comment else ''
-    paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{number}{text4}{date}{text5}' \
+    paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{f"{number_prefix}-{number}"}{text4}{date}{text5}' \
         f'{postanovleniya[postanovlenie]}{text6}\t\n' \
         f'{tab}{fail if has_comment else success}\t\n' \
         f'{tab}{comment if has_comment else ""}\t\n'
