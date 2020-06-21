@@ -23,7 +23,7 @@ required_fields = {
 
 numeric_fields = ['inn', 'number']
 
-tab = '            '
+tab = '\t'
 text1 = 'Юридическим отделом государственного казенного учреждения «Центр реализации программ поддержки и ' \
         'развития малого и среднего предпринимательства Республики Татарстан» (далее – Учреждение) проверена заявка '
 text2 = ' (ИНН '
@@ -45,7 +45,7 @@ postanovleniya = {
                 'комиссии) сервисов с доставкой продуктов питания и еду» '
 }
 success = 'По итогам проверки замечания не выявлены.'
-fail_single = 'По итогам проверки выявлены следующее замечание:'
+fail_single = 'По итогам проверки выявлено следующее замечание:'
 fail_multi = 'По итогам проверки выявлены следующие замечания:'
 specialists = {
     'Е.Р. Зотина': 'Главный специалист						                             Е.Р.Зотина',
@@ -169,8 +169,8 @@ def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_c
 def main():
     with open(COMMENTS_FILE, 'r+') as t:
         comments_file = t.read().strip()
-        comments_array = [e.strip() for e in
-                          filter(lambda el: el, comments_file.split(END_OF_COMMENT))] if comments_file else []
+        comments_array = set(e.strip() for e in
+                             filter(lambda el: el, comments_file.split(END_OF_COMMENT))) if comments_file else []
     layout = [
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
@@ -264,11 +264,12 @@ def main():
             window[HAS_NO_COMMENT].update(True)
 
             if not required_errors:
-                if comment and comment not in comments_array:
+                if comment:
                     for c in separate_comment(comment):
-                        with open(COMMENTS_FILE, 'a+') as f:
-                            f.write('%s%s\n' % (c, END_OF_COMMENT))
-                        comments_array.append(c)
+                        if c not in comments_array:
+                            with open(COMMENTS_FILE, 'a+') as f:
+                                f.write('%s%s\n' % (c, END_OF_COMMENT))
+                            comments_array.add(c)
                 main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, values[HAS_COMMENT], comment)
                 main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie)
             else:
