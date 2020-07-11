@@ -1,3 +1,4 @@
 PySimpleGUI
 python-docx
 openpyxl
+pyperclip
