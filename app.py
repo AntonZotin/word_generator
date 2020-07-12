@@ -8,6 +8,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 from datetime import datetime, date
+import pkg_resources.py2_warn
 
 from openpyxl import load_workbook
 
