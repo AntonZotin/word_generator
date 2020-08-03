@@ -171,7 +171,7 @@ def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_c
 def main():
     multiline_disabled = True
     Gui.PopupAnimated(splash)
-    with open(COMMENTS_FILE, 'w+') as t:
+    with open(COMMENTS_FILE, 'r+') as t:
         comments_file = t.read().strip()
         comments_array = set(e.strip() for e in
                              filter(lambda el: el, comments_file.split(END_OF_COMMENT))) if comments_file else set()
@@ -210,7 +210,7 @@ def main():
             if multiline_disabled:
                 Gui.popup('Выбери соответствие заявки: Не соответствует', title='Статус заявки')
             else:
-                pyperclip.copy(values['comment'])
+                pyperclip.copy(window['comment'].Widget.selection_get())
         elif event == "Вставить":
             if multiline_disabled:
                 Gui.popup('Выбери соответствие заявки: Не соответствует', title='Статус заявки')
