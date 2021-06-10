@@ -6,4 +6,6 @@
 
 # Сборка
 
+1. pyinstaller --paths venv/Lib/site-packages --onefile app.py
+
 1. pyinstaller --paths venv/Lib/site-packages --windowed --onefile app.py
