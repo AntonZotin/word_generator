@@ -6,6 +6,5 @@ build
 .*.xlsx
 *.spec
 __pycache__
-templates.txt
 Реестр заявок №326.xlsx
 Реестр заявок №327.xlsx
