@@ -1,6 +1,6 @@
 import sys
 
-from src.main import run
+from src.first_window import run
 
 
 if __name__ == '__main__':

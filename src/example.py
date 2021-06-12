@@ -3,16 +3,11 @@ import traceback
 
 import pyperclip
 import PySimpleGUI as Gui
-from docx import Document
-from docx.enum.style import WD_STYLE_TYPE
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
-from docx.shared import Pt
-from datetime import datetime, date
-import pkg_resources.py2_warn  # игнор предупреждений
-
-from openpyxl import load_workbook
 
 from images import splash
+from src.generate_doc import main_generate_word
+from src.generate_excel import main_insert_and_sort_xlsx
+from src.strings import specialists, postanovleniya, COMMENTS_FILE, END_OF_COMMENT, HAS_NO_COMMENT, HAS_COMMENT
 
 required_fields = {
     'name': 'Наименование компании',
@@ -27,147 +22,9 @@ required_fields = {
 
 numeric_fields = ['inn', 'number']
 
-tab = '\t'
-text1 = 'Юридическим отделом государственного казенного учреждения «Центр реализации программ поддержки и ' \
-        'развития малого и среднего предпринимательства Республики Татарстан» (далее – Учреждение) проверена заявка '
-text2 = ' (ИНН '
-text3 = ') № '
-text4 = ' от '
-text5 = ' на предмет соответствия требованиям '
-text6 = ' (далее – Порядок).'
-postanovleniya = {
-    'Процентная ставка': 'Порядка предоставления субсидий на возмещение части затрат, связанных с уплатой процентов '
-                         'по кредитам, привлеченным в российских кредитных организациях, утвержденного постановлением '
-                         'Кабинета Министров Республики Татарстан от 25.04.2020 № 327 «Об утверждении Порядка '
-                         'предоставления субсидий на возмещение части затрат, связанных с уплатой процентов по '
-                         'кредитам, привлеченным в российских кредитных организациях»',
-    'Доставка': 'Порядка предоставления субсидий из бюджета Республики Татарстан в целях возмещения затрат субъектов '
-                'малого и среднего предпринимательства, связанных с оплатой услуг (комиссии) сервисов с доставкой '
-                'продуктов питания и еду, утвержденного постановлением Кабинета Министров Республики Татарстан от '
-                '25.04.2020 № 326 «Об утверждении Порядка предоставления субсидий из бюджета Республики Татарстан в '
-                'целях возмещения затрат субъектов малого и среднего предпринимательства, связанных с оплатой услуг ('
-                'комиссии) сервисов с доставкой продуктов питания и еду» '
-}
-success = 'По итогам проверки замечания не выявлены.'
-fail_single = 'По итогам проверки выявлено следующее замечание:'
-fail_multi = 'По итогам проверки выявлены следующие замечания:'
-specialists = {
-    'Е.Р. Зотина': 'Главный специалист						                             Е.Р.Зотина',
-    'М.Р. Галиев': 'Главный специалист						                           М.Р.Галиев',
-    'Д.З. Соловьев': 'Главный специалист						                        Д.З.Соловьев'
-}
-footer = 'Дата: '
-
-HAS_NO_COMMENT = 'Соответствует'
-HAS_COMMENT = 'Не соответствует'
-END_OF_COMMENT = '<END_OF_COMMENT>'
-COMMENTS_FILE = 'templates.txt'
-
-XLSX_FILE_PREFIX = 'Реестр заявок №'
-XLSX_FILE_SUFFIX = '.xlsx'
-XLSX_PP = 'C'
-XLSX_NAME = 'D'
-XLSX_INN = 'E'
-XLSX_NUMBER = 'F'
-XLSX_DATE = 'G'
-XLSX_ISPOLNITEL = 'H'
-
-
-def insert_values_in_row(ws, values, row):
-    ws[f'{XLSX_NAME}{row}'].value = values[0]
-    ws[f'{XLSX_INN}{row}'].value = values[1]
-    ws[f'{XLSX_NUMBER}{row}'].value = values[2]
-    ws[f'{XLSX_DATE}{row}'].value = values[3]
-    ws[f'{XLSX_ISPOLNITEL}{row}'].value = values[4]
-
-
-def get_str_date(ws, row):
-    return str(ws[f'{XLSX_DATE}{row.row}'].value.strftime("%d.%m.%Y")) \
-        if isinstance(ws[f'{XLSX_DATE}{row.row}'].value, datetime) \
-           or isinstance(ws[f'{XLSX_DATE}{row.row}'].value, date) else ws[f'{XLSX_DATE}{row.row}'].value
-
 
 def separate_comment(comment):
     return [re.sub('^\d+[.)\s+]+', '', c) for c in comment.strip().split('\n')]
-
-
-def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie):
-    number_post = '327' if postanovlenie == 'Процентная ставка' else '326'
-    number_prefix = 'П' if postanovlenie == 'Процентная ставка' else 'Д'
-    document_name = f'{XLSX_FILE_PREFIX}{number_post}{XLSX_FILE_SUFFIX}'
-    document = load_workbook(document_name)
-    ws = document.active
-    new_row = [name, inn, f'{number_prefix}-{number}', date, ispolnitel]
-    rows = [new_row, ]
-    begin_row = 1
-    for row in ws[XLSX_NAME]:
-        if row.row == 1:
-            continue
-        elif not row.value:
-            if ws[f'{XLSX_PP}{row.row}'].value:
-                break
-            else:
-                rows = [new_row, ]
-                begin_row = row.row
-                continue
-        else:
-            rows.append([
-                ws[f'{XLSX_NAME}{row.row}'].value,
-                ws[f'{XLSX_INN}{row.row}'].value,
-                ws[f'{XLSX_NUMBER}{row.row}'].value,
-                get_str_date(ws, row),
-                ws[f'{XLSX_ISPOLNITEL}{row.row}'].value
-            ])
-    sorted_rows = sorted(rows, key=lambda r: r[2])
-    for row in range(len(sorted_rows)):
-        insert_values_in_row(ws, sorted_rows[row], begin_row + row + 1)
-    document.save(document_name)
-
-
-def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
-    number_prefix = 'П' if postanovlenie == 'Процентная ставка' else 'Д'
-    fail = fail_multi if has_comment and "\n" in comment else fail_single
-    comment = comment.replace("\n", "\t\n" + tab) if has_comment else ''
-    paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{f"{number_prefix}-{number}"}{text4}{date}{text5}' \
-        f'{postanovleniya[postanovlenie]}{text6}\t\n' \
-        f'{tab}{fail if has_comment else success}\t\n' \
-        f'{tab}{comment if has_comment else ""}\t\n'
-    paragraph2 = f'{specialists[ispolnitel]}\n\n\n'
-    paragraph3 = f'{footer}{datetime.today().strftime("%d.%m.%Y")}'
-
-    document = Document()
-
-    obj_styles = document.styles
-    obj_charstyle = obj_styles.add_style('Main title', WD_STYLE_TYPE.CHARACTER)
-    obj_font = obj_charstyle.font
-    obj_font.size = Pt(14)
-    obj_font.name = 'Times New Roman'
-    obj_charstyle = obj_styles.add_style('Middle paragraph', WD_STYLE_TYPE.CHARACTER)
-    obj_font = obj_charstyle.font
-    obj_font.size = Pt(14)
-    obj_font.name = 'Times New Roman'
-    obj_charstyle = obj_styles.add_style('Last paragraph', WD_STYLE_TYPE.CHARACTER)
-    obj_font = obj_charstyle.font
-    obj_font.size = Pt(8)
-    obj_font.name = 'Times New Roman'
-
-    t = document.add_paragraph('')
-    t.add_run('ЗАКЛЮЧЕНИИЕ ЮРИДИЧЕСКОГО ОТДЕЛА', style='Main title').bold = True
-    t.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    p1 = document.add_paragraph('')
-    p1.add_run(paragraph1, style='Middle paragraph')
-    p1.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-
-    p2 = document.add_paragraph('')
-    p2.add_run(paragraph2, style='Middle paragraph').bold = True
-    p2.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-
-    p3 = document.add_paragraph('')
-    p3.add_run(paragraph3, style='Last paragraph')
-    p3.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-
-    document.save("%s %s.docx" % (name.replace('\"', '\''), number[-4:]))
 
 
 def main():
@@ -193,7 +50,7 @@ def main():
          Gui.Radio(HAS_COMMENT, default=False, group_id='1', key=HAS_COMMENT)],
         [Gui.Text('Комментарий', size=(20, 1)), Gui.Multiline(size=(40, 10), key='comment', disabled=multiline_disabled, right_click_menu=right)],
         [Gui.Text('Шаблон комментария', size=(20, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
-        [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Сгенерировать')]
+        [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад')]
     ]
 
     Gui.PopupAnimated(None)
@@ -205,7 +62,6 @@ def main():
     templates_active = False
     while True:
         event, values = window.read(timeout=100)
-        print(event, values)
         if event in (None, 'Exit', 'Cancel', 'Закрыть'):
             return 0
         elif event == "Копировать":
@@ -295,6 +151,9 @@ def main():
                 main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie)
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
+        elif event == 'Назад':
+            window.close()
+            break
 
 
 def run():
