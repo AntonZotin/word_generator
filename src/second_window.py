@@ -26,7 +26,7 @@ def main(program):
                 Gui.Submit(button_text=two_first_button, size=(12, 6)),
                 Gui.Submit(button_text=two_second_button, size=(12, 6)),
                 Gui.Submit(button_text=two_third_button, size=(12, 6))
-            ]])
+            ]], pad=(10, 10))
         ],
         [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Назад')]
     ]

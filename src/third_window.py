@@ -9,10 +9,10 @@ second_button = 'Процентная ставка'
 def main(program, customer):
     layout = [
         [
-            Gui.Frame('Labelled Group', layout=[
+            Gui.Frame('Labelled Group', [[
                 Gui.Submit(button_text=first_button, size=(12, 6)),
                 Gui.Submit(button_text=second_button, size=(12, 6))
-            ])
+            ]])
         ]
     ]
     window = Gui.Window('Выбор заявителя', layout, grab_anywhere=False, size=(300, 120)).Finalize()
