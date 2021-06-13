@@ -2,23 +2,22 @@ import traceback
 
 import PySimpleGUI as Gui
 
-from images import splash
+from src.images import splash
 from src.second_window import run as sec_main
 
 
 first_button = 'Доставка'
-second_button = 'Процентная ставка'
+second_button = 'Процентная\nставка'
 
 
 def main():
     Gui.PopupAnimated(splash)
     layout = [
-        [Gui.Text('', size=(2, 1)),
-         Gui.Submit(button_text=first_button, size=(12, 6)),
+        [Gui.Submit(button_text=first_button, size=(12, 6)),
          Gui.Submit(button_text=second_button, size=(12, 6))]
     ]
     Gui.PopupAnimated(None)
-    window = Gui.Window('Выбор программы', layout, grab_anywhere=False, size=(300, 120)).Finalize()
+    window = Gui.Window('Выбор программы', layout, grab_anywhere=False, size=(300, 120), element_justification='c').Finalize()
 
     while True:
         event, values = window.read(timeout=100)

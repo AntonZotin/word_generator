@@ -1,10 +1,11 @@
 import re
+import sys
 import traceback
 
 import pyperclip
 import PySimpleGUI as Gui
 
-from images import splash
+from src.images import splash
 from src.generate_doc import main_generate_word
 from src.generate_excel import main_insert_and_sort_xlsx
 from src.strings import specialists, postanovleniya, COMMENTS_FILE, END_OF_COMMENT, HAS_NO_COMMENT, HAS_COMMENT
@@ -163,3 +164,7 @@ def run():
         Gui.PopupAnimated(None)
         tb = traceback.format_exc()
         Gui.popup_error(f'An error happened. Here is the info:', e, tb)
+
+
+if __name__ == '__main__':
+    sys.exit(run())

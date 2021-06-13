@@ -1,5 +1,4 @@
-import traceback
-
+import sys
 import PySimpleGUI as Gui
 
 from src.checklist_strings import strings
@@ -8,7 +7,7 @@ header_max_symbols = 50
 text_max_symbols = 80
 
 
-def main(program, customer):
+def main():
     arr = []
     index = 1
     for c in strings:
@@ -32,12 +31,11 @@ def main(program, customer):
             index += 1
 
     layout = [
-        [Gui.Col(arr, size=(950, 780), scrollable=True, vertical_scroll_only=True)],
-        [Gui.Submit(button_text='Результат', key='Result')],
-        [Gui.Submit(button_text='Назад')]
+        [Gui.Col(arr, size=(950, 950), scrollable=True)],
+        [Gui.Text('', size=(50, 1)), Gui.Submit(button_text='Результат', key='Result'),
+         Gui.Submit(button_text='Закрыть', key='Cancel')]
     ]
-    window = Gui.Window('Документы обязательные для предоставления', layout, grab_anywhere=False,
-                        element_justification='c').Finalize()
+    window = Gui.Window('Документы обязательные для предоставления', layout, grab_anywhere=False).Finalize()
 
     while True:
         event, values = window.read(timeout=100)
@@ -49,15 +47,7 @@ def main(program, customer):
                 window[f"RADIO{res[0]}-text"].update(text_color='#37ff5a')
             else:
                 window[f"RADIO{res[0]}-text"].update(text_color='#ff4f4f')
-        elif event == 'Назад':
-            window.close()
-            break
 
 
-def run(program, customer):
-    try:
-        main(program, customer)
-    except Exception as e:
-        Gui.PopupAnimated(None)
-        tb = traceback.format_exc()
-        Gui.popup_error(f'An error happened. Here is the info:', e, tb)
+if __name__ == '__main__':
+    sys.exit(main())

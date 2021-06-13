@@ -28,9 +28,9 @@ def main(program):
                 Gui.Submit(button_text=two_third_button, size=(12, 6))
             ]], pad=(10, 10))
         ],
-        [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Назад')]
+        [Gui.Submit(button_text='Назад')]
     ]
-    window = Gui.Window('Выбор заявителя', layout, grab_anywhere=False, size=(370, 400)).Finalize()
+    window = Gui.Window('Выбор заявителя', layout, grab_anywhere=False, size=(390, 360), element_justification='c').Finalize()
 
     while True:
         event, values = window.read(timeout=100)
