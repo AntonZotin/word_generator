@@ -4,6 +4,7 @@ import PySimpleGUI as Gui
 
 from src.images import splash
 from src.second_window import run as sec_main
+from src.eda_sec_window import run as eda_sec_main
 
 
 first_button = 'Доставка'
@@ -25,7 +26,10 @@ def main():
             return 0
         elif event == first_button or event == second_button:
             window.hide()
-            sec_main(event)
+            if event == first_button:
+                eda_sec_main()
+            else:
+                sec_main(event)
             window.un_hide()
 
 
