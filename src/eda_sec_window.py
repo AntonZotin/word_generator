@@ -1,9 +1,11 @@
 import traceback
+from datetime import datetime
 
 import PySimpleGUI as Gui
 
 from src.checklist_strings import fizik, yurik
 from src.eda_third_window import run as eda_thi_main
+from src.utils import search_by_inn
 
 required_fields = {
     'name': 'Наименование компании',
@@ -15,15 +17,24 @@ required_fields = {
 numeric_fields = ['inn', 'number']
 
 
+def insert_name(inn, prefix, window):
+    name = search_by_inn(inn).get('n')
+    if name is not None:
+        window['name'].update(f"{prefix}{name}")
+
+
 def main():
+    now = datetime.now()
     layout = [
-        [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
-        [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
-        [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
-        [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='date', enable_events=True)],
         [Gui.Text('Тип заявителя', size=(20, 1)),
          Gui.Radio(fizik, default=True, group_id='1', key=fizik),
          Gui.Radio(yurik, default=False, group_id='1', key=yurik), Gui.Text('', size=(5, 1))],
+        [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
+        [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
+        [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
+        [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(16, 1), key='date', enable_events=True),
+         Gui.CalendarButton('Календарь',  target='date', default_date_m_d_y=(now.month, now.day, now.year),
+                            format="%d.%m.%Y")],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад')]
     ]
     Gui.PopupAnimated(None)
@@ -39,6 +50,11 @@ def main():
             break
         elif event in numeric_fields and values[event] and values[event][-1] not in '0123456789':
             window[event].update(values[event][:-1])
+        elif event == 'inn' and values[event]:
+            if len(values[event]) == 10 and values[yurik]:
+                insert_name(values[event], '', window)
+            elif len(values[event]) == 12 and values[fizik]:
+                insert_name(values[event], 'ИП ', window)
         elif event == 'date' and values[event]:
             if len(values[event]) == 2 or len(values[event]) == 5:
                 window[event].update(values[event] + '.')
