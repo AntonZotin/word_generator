@@ -1,4 +1,4 @@
-PySimpleGUI
-python-docx
-openpyxl
-pyperclip
+PySimpleGUI==4.57.0
+python-docx==0.8.10
+openpyxl==3.0.6
+pyperclip==1.8.2

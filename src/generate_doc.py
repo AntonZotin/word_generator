@@ -9,7 +9,7 @@ from src.strings import fail_multi, tab, text1, text2, text3, text4, text5, text
     postanovleniya, success, specialists, footer
 
 
-def main_generate_word(name, inn, number, date, ispolnitel, postanovlenie, has_comment, comment):
+def main_generate_word(data):
     number_prefix = 'П' if postanovlenie == 'Процентная ставка' else 'Д'
     fail = fail_multi if has_comment and "\n" in comment else fail_single
     comment = comment.replace("\n", "\t\n" + tab) if has_comment else ''

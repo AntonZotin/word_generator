@@ -18,7 +18,7 @@ def get_str_date(ws, row):
            or isinstance(ws[f'{XLSX_DATE}{row.row}'].value, date) else ws[f'{XLSX_DATE}{row.row}'].value
 
 
-def main_insert_and_sort_xlsx(name, inn, number, date, ispolnitel, postanovlenie):
+def main_insert_and_sort_xlsx(data):
     number_post = '327' if postanovlenie == 'Процентная ставка' else '326'
     number_prefix = 'П' if postanovlenie == 'Процентная ставка' else 'Д'
     document_name = f'../{XLSX_FILE_PREFIX}{number_post}{XLSX_FILE_SUFFIX}'

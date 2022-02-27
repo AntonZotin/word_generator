@@ -4,14 +4,17 @@ from datetime import datetime
 import PySimpleGUI as Gui
 
 from src.checklist_strings import fizik, yurik
-from src.eda_third_window import run as eda_thi_main
+from src.eda_2_window import run as eda_2
+from src.strings import specialists
 from src.utils import search_by_inn
 
 required_fields = {
     'name': 'Наименование компании',
     'inn': 'ИНН',
     'number': 'Номер заявки',
-    'date': 'Дата заявки',
+    'request_date': 'Дата заявки',
+    'ispolnitel': 'Исполнитель',
+    'check_date': 'Дата проверки',
 }
 
 numeric_fields = ['inn', 'number']
@@ -32,13 +35,18 @@ def main():
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
         [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
-        [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(16, 1), key='date', enable_events=True),
-         Gui.CalendarButton('Календарь',  target='date', default_date_m_d_y=(now.month, now.day, now.year),
+        [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(16, 1), key='request_date', enable_events=True),
+         Gui.CalendarButton('Календарь',  target='request_date', default_date_m_d_y=(now.month, now.day, now.year),
+                            format="%d.%m.%Y")],
+        [Gui.Text('Исполнитель', size=(20, 1)), Gui.Combo([*specialists.keys()], size=(40, 1),
+                                                          readonly=True, key='ispolnitel')],
+        [Gui.Text('Дата проверки', size=(20, 1)), Gui.Input(size=(16, 1), key='check_date', enable_events=True),
+         Gui.CalendarButton('Календарь',  target='check_date', default_date_m_d_y=(now.month, now.day, now.year),
                             format="%d.%m.%Y")],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад')]
     ]
     Gui.PopupAnimated(None)
-    window = Gui.Window('Выбор программы', layout, grab_anywhere=False, size=(400, 170),
+    window = Gui.Window('Выбор программы', layout, grab_anywhere=False, size=(400, 240),
                         element_justification='c').Finalize()
 
     while True:
@@ -55,7 +63,7 @@ def main():
                 insert_name(values[event], '', window)
             elif len(values[event]) == 12 and values[fizik]:
                 insert_name(values[event], 'ИП ', window)
-        elif event == 'date' and values[event]:
+        elif (event == 'request_date' or event == 'check_date') and values[event]:
             if len(values[event]) == 2 or len(values[event]) == 5:
                 window[event].update(values[event] + '.')
             elif len(values[event]) == 11:
@@ -65,22 +73,22 @@ def main():
                 'name': values['name'],
                 'inn': values['inn'],
                 'number': values['number'],
-                'date': values['date'],
-                'type': fizik if values[fizik] is True else yurik
+                'request_date': values['request_date'],
+                'type': fizik if values[fizik] is True else yurik,
+                'ispolnitel': values['ispolnitel'],
+                'check_date': values['check_date'],
             }
             required_errors = []
-            if not values['name']: required_errors.append(required_fields['name'])
             if not values['inn']: required_errors.append(required_fields['inn'])
+            if not values['name']: required_errors.append(required_fields['name'])
             if not values['number']: required_errors.append(required_fields['number'])
-            if not values['date']: required_errors.append(required_fields['date'])
+            if not values['request_date']: required_errors.append(required_fields['request_date'])
+            if not values['ispolnitel']: required_errors.append(required_fields['ispolnitel'])
+            if not values['check_date']: required_errors.append(required_fields['check_date'])
 
             if not required_errors:
-                # window['name'].update('')
-                # window['inn'].update('')
-                # window['number'].update('')
-                # window['date'].update('')
                 window.hide()
-                eda_thi_main(result)
+                eda_2(result)
                 window.un_hide()
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')

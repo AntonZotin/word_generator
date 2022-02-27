@@ -3,7 +3,8 @@ import traceback
 
 import PySimpleGUI as Gui
 
-from src.checklist_strings import eda_crits
+from src.checklist_strings import eda_docs
+from src.eda_3_window import run as eda_3
 
 header_max_symbols = 50
 text_max_symbols = 80
@@ -18,7 +19,7 @@ def main(data):
     arr = []
     radios = {}
     index = 1
-    for c, perm, maybe in eda_crits:
+    for c, perm, maybe in eda_docs:
         if c.startswith('HEADER '):
             c = c.replace('HEADER ', '')
             arr += [
@@ -43,7 +44,7 @@ def main(data):
         [Gui.Col(arr, size=(950, 780), scrollable=True, vertical_scroll_only=True)],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад')]
     ]
-    window = Gui.Window('Требования к заявителям и критерии отбора', layout, grab_anywhere=False,
+    window = Gui.Window('Документы обязательные для предоставления', layout, grab_anywhere=False,
                         element_justification='c').Finalize()
 
     while True:
@@ -63,9 +64,9 @@ def main(data):
             break
         elif event == 'Далее':
             filtered = [filter_key(k) for k, v in values.items() if v is True]
-            data['error_crits'] = [radios[f] for f in filtered if f is not None]
+            data['error_docs'] = [radios[f] for f in filtered if f is not None]
             window.hide()
-            print(data)
+            eda_3(data)
             window.un_hide()
 
 
