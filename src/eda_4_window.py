@@ -23,15 +23,20 @@ def separate_comment(comment):
 
 
 def main(data):
+    init_text = ""
+    for d in data['error_docs']:
+        init_text += f"{d}\n"
+    for c in data['error_crits']:
+        init_text += f"{c}\n"
     with open(COMMENTS_FILE, 'r+') as t:
         comments_file = t.read().strip()
         comments_array = set(e.strip() for e in
                              filter(lambda el: el, comments_file.split(END_OF_COMMENT))) if comments_file else set()
     right = ["right_menu", ["Копировать", "Вставить"]]
     layout = [
-        [Gui.Text('Комментарий', size=(20, 1)), Gui.Multiline(size=(40, 10), key='comment', disabled=False, right_click_menu=right)],
-        [Gui.Text('Шаблон комментария', size=(20, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
-        [Gui.Text('', size=(25, 1)), Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад')]
+        [Gui.Text('Комментарий', size=(10, 1)), Gui.Multiline(size=(80, 30), key='comment', disabled=False, right_click_menu=right, default_text=init_text)],
+        [Gui.Text('Шаблон комментария', size=(16, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
+        [Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад')]
     ]
     window = Gui.Window('Предварительный просмотр замечаний', layout, grab_anywhere=False, element_justification='c').Finalize()
 
@@ -55,10 +60,13 @@ def main(data):
             elif template_event == 'Select template':
                 try:
                     tv = list(filter(lambda k: template_values[k], template_values.keys()))
-                    window['comment'].update(re.sub('\n$', '', values['comment'], 1) + tv[0] + '\n')
+                    res_comment = values['comment']
+                    if not res_comment.endswith('\n'):
+                        res_comment += '\n'
+                    res_comment += tv[0] + '\n'
+                    window['comment'].update(res_comment)
                     templates_active = False
                     template_window.close()
-                    window['comment'].update(disabled=False)
                 except IndexError:
                     Gui.popup('Вы не выбрали шаблон', title='')
         elif not templates_active and event == 'template':
@@ -66,7 +74,7 @@ def main(data):
             template_layout = [
                 [Gui.Col([[Gui.Radio(ca, default=False, group_id='2', key=ca,
                                      text_color='black', background_color='white')] for ca in comments_array],
-                         background_color='white', size=(600, 500), scrollable=True)],
+                         background_color='white', size=(660, 500), scrollable=True)],
                 [Gui.Text('', size=(30, 1)), Gui.Submit(button_text='Выбрать', key='Select template'),
                  Gui.Submit(button_text='Закрыть', key='Cancel')]]
             template_window = Gui.Window('Выбор шаблона', template_layout)
@@ -80,7 +88,7 @@ def main(data):
                         comments_array.add(c)
                 data['comment'] = comment
             main_generate_word(data)
-            main_insert_and_sort_xlsx(data)
+            # main_insert_and_sort_xlsx(data)
 
 
 def run(data):
