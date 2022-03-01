@@ -87,6 +87,7 @@ def main(data):
                             f.write('%s%s\n' % (c, END_OF_COMMENT))
                         comments_array.add(c)
                 data['comment'] = comment
+            data['postanovlenie'] = 'Д'
             main_generate_word(data)
             # main_insert_and_sort_xlsx(data)
 

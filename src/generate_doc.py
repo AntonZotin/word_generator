@@ -9,15 +9,19 @@ from src.strings import fail_multi, tab, text1, text2, text3, text4, text5, text
     postanovleniya, success, specialists, footer
 
 
+def has_comment(data):
+    return "comment" in data
+
+
 def main_generate_word(data):
-    number_prefix = 'П' if postanovlenie == 'Процентная ставка' else 'Д'
-    fail = fail_multi if has_comment and "\n" in comment else fail_single
-    comment = comment.replace("\n", "\t\n" + tab) if has_comment else ''
-    paragraph1 = f'{tab}{text1}{name}{text2}{inn}{text3}{f"{number_prefix}-{number}"}{text4}{date}{text5}' \
-        f'{postanovleniya[postanovlenie]}{text6}\t\n' \
-        f'{tab}{fail if has_comment else success}\t\n' \
-        f'{tab}{comment if has_comment else ""}\t\n'
-    paragraph2 = f'{specialists[ispolnitel]}\n\n\n'
+    fail = fail_multi if has_comment(data) and "\n" in data["comment"] else fail_single
+    comment = data['comment'].replace("\n", "\t\n" + tab) if has_comment(data) else ''
+    number = f"{data['postanovlenie']}-{data['number']}"
+    paragraph1 = f'{tab}{text1}{data["name"]}{text2}{data["inn"]}{text3}{number}{text4}{data["request_date"]}{text5}' \
+        f'{postanovleniya[data["postanovlenie"]]}{text6}\t\n' \
+        f'{tab}{fail if has_comment(data) else success}\t\n' \
+        f'{tab}{comment if has_comment(data) else ""}\t\n'
+    paragraph2 = f'{specialists[data["ispolnitel"]]}\n\n\n'
     paragraph3 = f'{footer}{datetime.today().strftime("%d.%m.%Y")}'
 
     document = Document()
@@ -52,4 +56,4 @@ def main_generate_word(data):
     p3.add_run(paragraph3, style='Last paragraph')
     p3.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
 
-    document.save("../%s %s.docx" % (name.replace('\"', '\''), number[-4:]))
+    document.save("../%s %s.docx" % (data['name'].replace('\"', '\''), number[-4:]))
