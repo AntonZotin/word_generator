@@ -43,10 +43,10 @@ def main():
         [Gui.Text('Дата проверки', size=(20, 1)), Gui.Input(size=(16, 1), key='check_date', enable_events=True),
          Gui.CalendarButton('Календарь',  target='check_date', default_date_m_d_y=(now.month, now.day, now.year),
                             format="%d.%m.%Y")],
-        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад')]
+        [Gui.Submit(button_text='Далее')]
     ]
     Gui.PopupAnimated(None)
-    window = Gui.Window('Выбор программы', layout, grab_anywhere=False, size=(400, 240),
+    window = Gui.Window('Общие данные', layout, grab_anywhere=False, size=(400, 240),
                         element_justification='c').Finalize()
 
     while True:
@@ -88,7 +88,16 @@ def main():
 
             if not required_errors:
                 window.hide()
-                eda_2(result)
+                res = eda_2(result)
+                if res == 'back':
+                    window[fizik].update(True)
+                    window[yurik].update(False)
+                    window['inn'].update('')
+                    window['name'].update('')
+                    window['number'].update('')
+                    window['request_date'].update('')
+                    window['ispolnitel'].update('')
+                    window['check_date'].update('')
                 window.un_hide()
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')

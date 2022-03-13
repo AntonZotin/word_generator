@@ -1,12 +1,11 @@
 
 from docx import Document
-from datetime import datetime
 from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 
-from src.strings import fail_multi, tab, text1, text2, text3, text4, text5, text6, fail_single, \
-    postanovleniya, success, specialists, footer
+from src.strings import fail_multi, tab, text1, text2, fail_single, \
+    success, specialists
 
 
 def has_comment(data):
@@ -15,14 +14,20 @@ def has_comment(data):
 
 def main_generate_word(data):
     fail = fail_multi if has_comment(data) and "\n" in data["comment"] else fail_single
-    comment = data['comment'].replace("\n", "\t\n" + tab) if has_comment(data) else ''
+    count_c = 1
+    comment = ''
+    for c in data.get('comment', '').split('\n'):
+        comment += f'{tab}{count_c}. {c}\n'
+        count_c += 1
     number = f"{data['postanovlenie']}-{data['number']}"
-    paragraph1 = f'{tab}{text1}{data["name"]}{text2}{data["inn"]}{text3}{number}{text4}{data["request_date"]}{text5}' \
-        f'{postanovleniya[data["postanovlenie"]]}{text6}\t\n' \
-        f'{tab}{fail if has_comment(data) else success}\t\n' \
-        f'{tab}{comment if has_comment(data) else ""}\t\n'
-    paragraph2 = f'{specialists[data["ispolnitel"]]}\n\n\n'
-    paragraph3 = f'{footer}{datetime.today().strftime("%d.%m.%Y")}'
+    paragraph1 = f'Заявитель: {data["name"]}\n' \
+        f'ИНН: {data["inn"]}\n' \
+        f'№ заявки  {number}\n' \
+        f'Дата: {data["request_date"]}\n'
+    paragraph2 = f'{tab}{text1}{fail if has_comment(data) else success}\t\n' \
+        f'{comment if has_comment(data) else ""}\n'
+    paragraph3 = f'{specialists[data["ispolnitel"]]}'
+    paragraph4 = f'{text2}\n\n\n'
 
     document = Document()
 
@@ -37,23 +42,27 @@ def main_generate_word(data):
     obj_font.name = 'Times New Roman'
     obj_charstyle = obj_styles.add_style('Last paragraph', WD_STYLE_TYPE.CHARACTER)
     obj_font = obj_charstyle.font
-    obj_font.size = Pt(8)
+    obj_font.size = Pt(11)
     obj_font.name = 'Times New Roman'
 
     t = document.add_paragraph('')
-    t.add_run('ЗАКЛЮЧЕНИИЕ ЮРИДИЧЕСКОГО ОТДЕЛА', style='Main title').bold = True
+    t.add_run('ЗАКЛЮЧЕНИИЕ ЮРИДИЧЕСКОГО ОТДЕЛА\n\n', style='Main title')
     t.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     p1 = document.add_paragraph('')
     p1.add_run(paragraph1, style='Middle paragraph')
-    p1.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+    p1.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
 
     p2 = document.add_paragraph('')
-    p2.add_run(paragraph2, style='Middle paragraph').bold = True
-    p2.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    p2.add_run(paragraph2, style='Middle paragraph')
+    p2.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
 
     p3 = document.add_paragraph('')
-    p3.add_run(paragraph3, style='Last paragraph')
-    p3.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+    p3.add_run(paragraph3, style='Middle paragraph')
+    p3.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+
+    p4 = document.add_paragraph('')
+    p4.add_run(paragraph4, style='Last paragraph').italic = True
+    p4.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
     document.save("../%s %s.docx" % (data['name'].replace('\"', '\''), number[-4:]))

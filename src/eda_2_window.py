@@ -3,11 +3,8 @@ import traceback
 
 import PySimpleGUI as Gui
 
-from src.checklist_strings import eda_docs
+from src.checklist_strings import eda_docs, header_max_symbols, text_max_symbols
 from src.eda_3_window import run as eda_3
-
-header_max_symbols = 50
-text_max_symbols = 80
 
 
 def filter_key(name):
@@ -42,7 +39,7 @@ def main(data):
 
     layout = [
         [Gui.Col(arr, size=(950, 780), scrollable=True, vertical_scroll_only=True)],
-        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад')]
+        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='В начало')]
     ]
     window = Gui.Window('Документы обязательные для предоставления', layout, grab_anywhere=False,
                         element_justification='c').Finalize()
@@ -51,6 +48,9 @@ def main(data):
         event, values = window.read(timeout=100)
         if event in (None, 'Exit', 'Cancel', 'Закрыть'):
             return 0
+        elif event == 'В начало':
+            window.close()
+            return 'back'
         elif 'RADIO' in str(event):
             res = event.replace('RADIO', '').split('-')
             if res[1] == 'yes':
@@ -66,13 +66,15 @@ def main(data):
             filtered = [filter_key(k) for k, v in values.items() if v is True]
             data['error_docs'] = [radios[f] for f in filtered if f is not None]
             window.hide()
-            eda_3(data)
+            res = eda_3(data)
+            if res == 'back':
+                return 'back'
             window.un_hide()
 
 
 def run(data):
     try:
-        main(data)
+        return main(data)
     except Exception as e:
         Gui.PopupAnimated(None)
         tb = traceback.format_exc()
