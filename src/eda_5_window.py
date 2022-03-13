@@ -7,7 +7,7 @@ import pyperclip
 from src.checklist_strings import eda_crits, eda_docs
 from src.generate_doc import main_generate_word
 from src.generate_excel import main_insert_and_sort_xlsx
-from src.strings import COMMENTS_FILE, END_OF_COMMENT
+from src.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA
 
 header_max_symbols = 50
 text_max_symbols = 80
@@ -98,6 +98,8 @@ def main(data):
                 main_insert_and_sort_xlsx(data)
             except PermissionError:
                 Gui.popup('Реестр сейчас открыт в другой программе, запись в него невозможна.', title='Нет прав')
+            except FileNotFoundError:
+                Gui.popup(f'Не найден реестр. Рядом с папкой программы должен лежать файл {XLSX_FILE_EDA}.xlsx.', title='Нет прав')
 
 
 def run(data):
