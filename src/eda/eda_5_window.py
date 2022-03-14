@@ -36,7 +36,7 @@ def main(data):
     layout = [
         [Gui.Text('Комментарий', size=(10, 1)), Gui.Multiline(size=(80, 30), key='comment', disabled=False, right_click_menu=right, default_text=init_text)],
         [Gui.Text('Шаблон комментария', size=(16, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
-        [Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='В начало')]
+        [Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
     window = Gui.Window('Предварительный просмотр замечаний', layout, grab_anywhere=False, element_justification='c').Finalize()
 
@@ -48,7 +48,7 @@ def main(data):
         elif event == 'Назад':
             window.close()
             break
-        elif event == 'В начало':
+        elif event == 'Сбросить все':
             window.close()
             return 'back'
         elif event == "Копировать":
@@ -93,13 +93,24 @@ def main(data):
                         comments_array.add(c)
                 data['comment'] = comment
             data['postanovlenie'] = 'Д'
-            main_generate_word(data)
+            success = False
+            try:
+                main_generate_word(data)
+                success = True
+            except PermissionError:
+                Gui.popup('Заключение сейчас открыто в Microsoft Word, перезапись невозможна.', title='Нет прав')
+
             try:
                 main_insert_and_sort_xlsx(data)
             except PermissionError:
                 Gui.popup('Реестр сейчас открыт в другой программе, запись в него невозможна.', title='Нет прав')
             except FileNotFoundError:
                 Gui.popup(f'Не найден реестр. Рядом с папкой программы должен лежать файл {XLSX_FILE_EDA}.xlsx.', title='Нет прав')
+
+            if success:
+                Gui.popup('Заключение успешно сгенерировано.', title='Успешно')
+                window.close()
+                return 'back'
 
 
 def run(data):
@@ -109,3 +120,4 @@ def run(data):
         Gui.PopupAnimated(None)
         tb = traceback.format_exc()
         Gui.popup_error(f'An error happened. Here is the info:', e, tb)
+        return 0

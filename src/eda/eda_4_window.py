@@ -2,7 +2,7 @@ import traceback
 
 import PySimpleGUI as Gui
 
-from src.eda_5_window import run as eda_5
+from src.eda.eda_5_window import run as eda_5
 
 
 def main(data):
@@ -18,7 +18,7 @@ def main(data):
         [Gui.Column(yandex, element_justification='c'), Gui.VSeperator(),
          Gui.Column(delivery, element_justification='c')],
         [Gui.Text(' ' * 60)],
-        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='В начало')]
+        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
     window = Gui.Window('Сумма понесенных затрат', layout, grab_anywhere=False,
                         element_justification='c').Finalize()
@@ -27,7 +27,7 @@ def main(data):
         event, values = window.read(timeout=100)
         if event in (None, 'Exit', 'Cancel', 'Закрыть'):
             return 0
-        elif event == 'В начало':
+        elif event == 'Сбросить все':
             window.close()
             return 'back'
         elif event == 'Назад':
@@ -37,35 +37,43 @@ def main(data):
             if not values['summ']:
                 Gui.popup('Вы не ввели обязательное поле:\nСумма по заявлению', title='Пустое поле')
             else:
+                error = False
                 try:
                     summ = float(values['summ'].replace(',', '.'))
                 except ValueError:
+                    error = True
                     Gui.popup('Вы ввели не числовое значение:\nСумма по заявлению', title='Ошибка')
                 else:
                     data['summ'] = summ
-                if values['yandex']:
+                if values.get('yandex'):
                     try:
                         yandex_summ = sum(float(ya.replace(',', '.')) for ya in values['yandex'].split('\n'))
                     except ValueError:
+                        error = True
                         Gui.popup('Вы ввели не числовое значение:\nЯндекс еда', title='Ошибка')
                     else:
                         data['yandex'] = yandex_summ
                 else:
                     data['yandex'] = 0.0
-                if values['delivery']:
+                if values.get('delivery'):
                     try:
                         delivery_summ = sum(float(ya.replace(',', '.')) for ya in values['delivery'].split('\n'))
                     except ValueError:
+                        error = True
                         Gui.popup('Вы ввели не числовое значение:\nЯндекс еда', title='Ошибка')
                     else:
                         data['delivery'] = delivery_summ
                 else:
                     data['delivery'] = 0.0
-                window.hide()
-                res = eda_5(data)
-                if res == 'back':
-                    return 'back'
-                window.un_hide()
+
+                if not error:
+                    window.hide()
+                    res = eda_5(data)
+                    if res == 'back':
+                        return 'back'
+                    elif res == 0:
+                        return 0
+                    window.un_hide()
 
 
 def run(data):
@@ -75,3 +83,4 @@ def run(data):
         Gui.PopupAnimated(None)
         tb = traceback.format_exc()
         Gui.popup_error(f'An error happened. Here is the info:', e, tb)
+        return 0

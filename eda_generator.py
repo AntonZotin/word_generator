@@ -1,6 +1,6 @@
 import sys
 
-from src.eda_1_window import run
+from src.eda.eda_1_window import run
 
 
 if __name__ == '__main__':

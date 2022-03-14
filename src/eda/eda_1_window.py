@@ -2,9 +2,10 @@ import traceback
 from datetime import datetime
 
 import PySimpleGUI as Gui
+from urllib3.exceptions import SSLError
 
 from src.checklist_strings import fizik, yurik
-from src.eda_2_window import run as eda_2
+from src.eda.eda_2_window import run as eda_2
 from src.strings import specialists
 from src.utils import search_by_inn
 
@@ -21,26 +22,33 @@ numeric_fields = ['inn', 'number']
 
 
 def insert_name(inn, prefix, window):
-    name = search_by_inn(inn).get('n')
+    try:
+        name = search_by_inn(inn).get('n')
+    except SSLError:
+        name = search_by_inn(inn, 'http').get('n')
     if name is not None:
         window['name'].update(f"{prefix}{name}")
+    else:
+        Gui.popup('Данные от ЕГРЮЛ отсутствуют.', title='Пустые поля')
 
 
 def main():
     now = datetime.now()
+    string_now = now.strftime('%d.%m.%Y')
     layout = [
         [Gui.Text('Тип заявителя', size=(20, 1)),
          Gui.Radio(fizik, default=True, group_id='1', key=fizik),
          Gui.Radio(yurik, default=False, group_id='1', key=yurik), Gui.Text('', size=(5, 1))],
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
-        [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
         [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(16, 1), key='request_date', enable_events=True),
          Gui.CalendarButton('Календарь',  target='request_date', default_date_m_d_y=(now.month, now.day, now.year),
                             format="%d.%m.%Y")],
+        [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
         [Gui.Text('Исполнитель', size=(20, 1)), Gui.Combo([*specialists.keys()], size=(40, 1),
                                                           readonly=True, key='ispolnitel')],
-        [Gui.Text('Дата проверки', size=(20, 1)), Gui.Input(size=(16, 1), key='check_date', enable_events=True),
+        [Gui.Text('Дата проверки', size=(20, 1)), Gui.Input(size=(16, 1), key='check_date', enable_events=True,
+                                                            default_text=string_now),
          Gui.CalendarButton('Календарь',  target='check_date', default_date_m_d_y=(now.month, now.day, now.year),
                             format="%d.%m.%Y")],
         [Gui.Submit(button_text='Далее')]
@@ -68,6 +76,7 @@ def main():
                 window[event].update(values[event] + '.')
             elif len(values[event]) == 11:
                 window[event].update(values[event][:-1])
+            window['number'].update(values[event].replace('.', ''))
         elif event == 'Далее':
             result = {
                 'name': values['name'],
@@ -98,6 +107,8 @@ def main():
                     window['request_date'].update('')
                     window['ispolnitel'].update('')
                     window['check_date'].update('')
+                elif res == 0:
+                    return 0
                 window.un_hide()
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
@@ -110,3 +121,4 @@ def run():
         Gui.PopupAnimated(None)
         tb = traceback.format_exc()
         Gui.popup_error(f'An error happened. Here is the info:', e, tb)
+        return 0

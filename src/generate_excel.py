@@ -42,7 +42,7 @@ def main_insert_and_sort_xlsx(data):
             count_c += 1
     count = 0
     new_row = [data['name'], data['inn'], f'{data["postanovlenie"]}-{data["number"]}',
-               data["request_date"], comment, data['summ'], data['yandex'], data['delivery'],
+               data["request_date"], comment, data['summ'], data.get('yandex'), data.get('delivery'),
                data['ispolnitel'], data["request_date"]]
     rows = [[count, *new_row], ]
     begin_row = 3

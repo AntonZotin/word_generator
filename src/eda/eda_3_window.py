@@ -3,8 +3,8 @@ import traceback
 
 import PySimpleGUI as Gui
 
-from src.checklist_strings import eda_docs, header_max_symbols, text_max_symbols
-from src.eda_3_window import run as eda_3
+from src.checklist_strings import eda_crits, header_max_symbols, text_max_symbols
+from src.eda.eda_4_window import run as eda_4
 
 
 def filter_key(name):
@@ -16,7 +16,7 @@ def main(data):
     arr = []
     radios = {}
     index = 1
-    for c, perm, maybe in eda_docs:
+    for c, perm, maybe in eda_crits:
         if c.startswith('HEADER '):
             c = c.replace('HEADER ', '')
             arr += [
@@ -39,16 +39,16 @@ def main(data):
 
     layout = [
         [Gui.Col(arr, size=(950, 780), scrollable=True, vertical_scroll_only=True)],
-        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='В начало')]
+        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
-    window = Gui.Window('Документы обязательные для предоставления', layout, grab_anywhere=False,
+    window = Gui.Window('Требования к заявителям и критерии отбора', layout, grab_anywhere=False,
                         element_justification='c').Finalize()
 
     while True:
         event, values = window.read(timeout=100)
         if event in (None, 'Exit', 'Cancel', 'Закрыть'):
             return 0
-        elif event == 'В начало':
+        elif event == 'Сбросить все':
             window.close()
             return 'back'
         elif 'RADIO' in str(event):
@@ -64,11 +64,13 @@ def main(data):
             break
         elif event == 'Далее':
             filtered = [filter_key(k) for k, v in values.items() if v is True]
-            data['error_docs'] = [radios[f] for f in filtered if f is not None]
+            data['error_crits'] = [radios[f] for f in filtered if f is not None]
             window.hide()
-            res = eda_3(data)
+            res = eda_4(data)
             if res == 'back':
                 return 'back'
+            elif res == 0:
+                return 0
             window.un_hide()
 
 
@@ -79,3 +81,4 @@ def run(data):
         Gui.PopupAnimated(None)
         tb = traceback.format_exc()
         Gui.popup_error(f'An error happened. Here is the info:', e, tb)
+        return 0
