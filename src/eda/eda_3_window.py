@@ -5,6 +5,7 @@ import PySimpleGUI as Gui
 
 from src.checklist_strings import eda_crits, header_max_symbols, text_max_symbols
 from src.eda.eda_4_window import run as eda_4
+from src.eda.comment_modal import run as comment
 
 
 def filter_key(name):
@@ -29,9 +30,10 @@ def main(data):
             height = int(len(c) / text_max_symbols)
             height += int(c.count('\n') / 5)
             arr += [
-                [Gui.Text(c, size=(100, height), key=f"RADIO{index}-text"), Gui.VerticalSeparator(),
+                [Gui.Text(c, size=(85, height), key=f"RADIO{index}-text"), Gui.VerticalSeparator(),
                  Gui.Radio('да', f"RADIO{index}", key=f"RADIO{index}-yes", enable_events=True),
-                 Gui.Radio('нет', f"RADIO{index}", key=f"RADIO{index}-{'maybe' if maybe else 'no'}", enable_events=True)],
+                 Gui.Radio('нет', f"RADIO{index}", key=f"RADIO{index}-{'maybe' if maybe else 'no'}", enable_events=True),
+                 Gui.Submit(button_text='Комментарий', key=f"BUTTON{index}")],
                 [Gui.Text('-' * 230)]
             ]
             radios[str(index)] = c
@@ -59,6 +61,17 @@ def main(data):
                 window[f"RADIO{res[0]}-text"].update(text_color='#ffa500')
             else:
                 window[f"RADIO{res[0]}-text"].update(text_color='#ff4f4f')
+        elif 'BUTTON' in str(event):
+            index = event.replace('BUTTON', '')
+            window.hide()
+            res = comment()
+            if res == 'back':
+                return 'back'
+            elif res == 0:
+                return 0
+            window.un_hide()
+            if res:
+                window[f"RADIO{index}-text"].update(value=res)
         elif event == 'Назад':
             window.close()
             break

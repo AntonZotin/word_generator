@@ -2,7 +2,6 @@ import traceback
 from datetime import datetime
 
 import PySimpleGUI as Gui
-from urllib3.exceptions import SSLError
 
 from src.checklist_strings import fizik, yurik
 from src.eda.eda_2_window import run as eda_2
@@ -21,18 +20,19 @@ required_fields = {
 numeric_fields = ['inn', 'number']
 
 
-def insert_name(inn, prefix, window):
+def insert_name(inn, login, password, prefix, window):
     try:
-        name = search_by_inn(inn).get('n')
-    except SSLError:
-        name = search_by_inn(inn, 'http').get('n')
+        name = search_by_inn(inn, login, password).get('n')
+    except Exception as e:
+        Gui.popup(e.args[0], title='Ошибка запроса к ЕГРЮЛ')
+        name = None
     if name is not None:
         window['name'].update(f"{prefix}{name}")
     else:
         Gui.popup('Данные от ЕГРЮЛ отсутствуют.', title='Пустые поля')
 
 
-def main():
+def main(data):
     now = datetime.now()
     string_now = now.strftime('%d.%m.%Y')
     layout = [
@@ -51,7 +51,7 @@ def main():
                                                             default_text=string_now),
          Gui.CalendarButton('Календарь',  target='check_date', default_date_m_d_y=(now.month, now.day, now.year),
                             format="%d.%m.%Y")],
-        [Gui.Submit(button_text='Далее')]
+        [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
     Gui.PopupAnimated(None)
     window = Gui.Window('Общие данные', layout, grab_anywhere=False, size=(400, 240),
@@ -68,9 +68,9 @@ def main():
             window[event].update(values[event][:-1])
         elif event == 'inn' and values[event]:
             if len(values[event]) == 10 and values[yurik]:
-                insert_name(values[event], '', window)
+                insert_name(values[event], data['login'], data['password'], '', window)
             elif len(values[event]) == 12 and values[fizik]:
-                insert_name(values[event], 'ИП ', window)
+                insert_name(values[event], data['login'], data['password'], 'ИП ', window)
         elif (event == 'request_date' or event == 'check_date') and values[event]:
             if len(values[event]) == 2 or len(values[event]) == 5:
                 window[event].update(values[event] + '.')
@@ -114,9 +114,9 @@ def main():
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
 
 
-def run():
+def run(data):
     try:
-        main()
+        main(data)
     except Exception as e:
         Gui.PopupAnimated(None)
         tb = traceback.format_exc()
