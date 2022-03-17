@@ -1,8 +1,7 @@
-import traceback
-
 import PySimpleGUI as Gui
 
-from src.eda.eda_1_window import run as eda_1
+from src.eda.decorators import exception_handler
+from src.eda.eda_1_window import eda_1
 
 required_fields = {
     'login': 'Логин',
@@ -10,7 +9,8 @@ required_fields = {
 }
 
 
-def main():
+@exception_handler
+def proxy_window():
     layout = [
         [Gui.Text('Логин', size=(5, 1)), Gui.InputText(size=(42, 1), key='login')],
         [Gui.Text('Пароль', size=(5, 1)), Gui.InputText(size=(42, 1), key='password')],
@@ -47,13 +47,3 @@ def main():
                 window.un_hide()
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
-
-
-def run():
-    try:
-        main()
-    except Exception as e:
-        Gui.PopupAnimated(None)
-        tb = traceback.format_exc()
-        Gui.popup_error(f'An error happened. Here is the info:', e, tb)
-        return 0

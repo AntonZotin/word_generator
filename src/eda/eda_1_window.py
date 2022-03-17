@@ -4,7 +4,8 @@ from datetime import datetime
 import PySimpleGUI as Gui
 
 from src.checklist_strings import fizik, yurik
-from src.eda.eda_2_window import run as eda_2
+from src.eda.decorators import exception_handler
+from src.eda.eda_2_window import eda_2
 from src.strings import specialists
 from src.utils import search_by_inn
 
@@ -32,7 +33,8 @@ def insert_name(inn, login, password, prefix, window):
         Gui.popup('Данные от ЕГРЮЛ отсутствуют.', title='Пустые поля')
 
 
-def main(data):
+@exception_handler
+def eda_1(data):
     now = datetime.now()
     string_now = now.strftime('%d.%m.%Y')
     layout = [
@@ -112,13 +114,3 @@ def main(data):
                 window.un_hide()
             else:
                 Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
-
-
-def run(data):
-    try:
-        main(data)
-    except Exception as e:
-        Gui.PopupAnimated(None)
-        tb = traceback.format_exc()
-        Gui.popup_error(f'An error happened. Here is the info:', e, tb)
-        return 0

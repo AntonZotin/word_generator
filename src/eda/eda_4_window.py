@@ -1,11 +1,11 @@
-import traceback
-
 import PySimpleGUI as Gui
 
-from src.eda.eda_5_window import run as eda_5
+from src.eda.decorators import exception_handler
+from src.eda.eda_5_window import eda_5
 
 
-def main(data):
+@exception_handler
+def eda_4(data):
     yandex = [[Gui.Text('Яндекс еда')],
               [Gui.Multiline(size=(30, 10), key='yandex', disabled=False)]]
 
@@ -74,13 +74,3 @@ def main(data):
                     elif res == 0:
                         return 0
                     window.un_hide()
-
-
-def run(data):
-    try:
-        return main(data)
-    except Exception as e:
-        Gui.PopupAnimated(None)
-        tb = traceback.format_exc()
-        Gui.popup_error(f'An error happened. Here is the info:', e, tb)
-        return 0

@@ -1,33 +1,24 @@
-import re
-import traceback
-
 import PySimpleGUI as Gui
 import pyperclip
 
 from src.checklist_strings import eda_crits, eda_docs
+from src.eda.decorators import exception_handler
 from src.generate_doc import main_generate_word
 from src.generate_excel import main_insert_and_sort_xlsx
 from src.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA
-
-header_max_symbols = 50
-text_max_symbols = 80
+from src.utils import separate_comment
 
 
-def filter_key(name):
-    matched = re.match('RADIO(\d+)-(\w+)', name).groups()
-    return matched[0] if matched[1] == 'no' else None
-
-
-def separate_comment(comment):
-    return [re.sub('^\d+[.)\s+]+', '', c) for c in comment.strip().split('\n')]
-
-
-def main(data):
+@exception_handler
+def eda_5(data):
     init_text = ""
+    count = 1
     for d in data['error_docs']:
-        init_text += f"{d}\n"
+        init_text += f"{count}. {d}\n"
+        count += 1
     for c in data['error_crits']:
-        init_text += f"{c}\n"
+        init_text += f"{count}. {c}\n"
+        count += 1
     with open(COMMENTS_FILE, 'r+') as t:
         comments_file = t.read().strip()
         comments_array = set(e.strip() for e in
@@ -111,13 +102,3 @@ def main(data):
                 Gui.popup('Заключение успешно сгенерировано.', title='Успешно')
                 window.close()
                 return 'back'
-
-
-def run(data):
-    try:
-        return main(data)
-    except Exception as e:
-        Gui.PopupAnimated(None)
-        tb = traceback.format_exc()
-        Gui.popup_error(f'An error happened. Here is the info:', e, tb)
-        return 0

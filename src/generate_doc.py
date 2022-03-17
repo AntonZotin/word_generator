@@ -14,11 +14,9 @@ def has_comment(data):
 
 def main_generate_word(data):
     fail = fail_multi if has_comment(data) and "\n" in data["comment"] else fail_single
-    count_c = 1
     comment = ''
     for c in data.get('comment', '').split('\n'):
-        comment += f'{tab}{count_c}. {c}\n'
-        count_c += 1
+        comment += f'{tab}{c}\n'
     number = f"{data['postanovlenie']}-{data['number']}"
     paragraph1 = f'Заявитель: {data["name"]}\n' \
         f'ИНН: {data["inn"]}\n' \

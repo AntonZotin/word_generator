@@ -1,10 +1,7 @@
 import sys
 import PySimpleGUI as Gui
 
-from src.checklist_strings import strings
-
-header_max_symbols = 50
-text_max_symbols = 80
+from src.checklist_strings import strings, header_max_symbols, text_max_symbols
 
 
 def main():
