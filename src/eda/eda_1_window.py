@@ -1,4 +1,3 @@
-import traceback
 from datetime import datetime
 
 import PySimpleGUI as Gui
@@ -21,9 +20,9 @@ required_fields = {
 numeric_fields = ['inn', 'number']
 
 
-def insert_name(inn, login, password, prefix, window):
+def insert_name(inn, host, login, password, prefix, window):
     try:
-        name = search_by_inn(inn, login, password).get('n')
+        name = search_by_inn(inn, host, login, password).get('n')
     except Exception as e:
         Gui.popup(e.args[0], title='Ошибка запроса к ЕГРЮЛ')
         name = None
@@ -70,9 +69,9 @@ def eda_1(data):
             window[event].update(values[event][:-1])
         elif event == 'inn' and values[event]:
             if len(values[event]) == 10 and values[yurik]:
-                insert_name(values[event], data['login'], data['password'], '', window)
+                insert_name(values[event], data['host'], data['login'], data['password'], '', window)
             elif len(values[event]) == 12 and values[fizik]:
-                insert_name(values[event], data['login'], data['password'], 'ИП ', window)
+                insert_name(values[event], data['host'], data['login'], data['password'], 'ИП ', window)
         elif (event == 'request_date' or event == 'check_date') and values[event]:
             if len(values[event]) == 2 or len(values[event]) == 5:
                 window[event].update(values[event] + '.')
