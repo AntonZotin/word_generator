@@ -5,7 +5,7 @@ import PySimpleGUI as Gui
 from src.utils.checklist_strings import fizik, yurik
 from src.utils.decorators import exception_handler
 from src.eda.eda_2_window import eda_2
-from src.utils.strings import specialists
+from src.utils.strings import specialists, EDA_1_WINDOW
 from src.utils.utils import search_by_inn
 
 required_fields = {
@@ -54,8 +54,7 @@ def eda_1(data):
                             format="%d.%m.%Y")],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
-    Gui.PopupAnimated(None)
-    window = Gui.Window('Общие данные', layout, grab_anywhere=False, size=(400, 240),
+    window = Gui.Window(EDA_1_WINDOW, layout, grab_anywhere=False, size=(400, 240),
                         element_justification='c').Finalize()
 
     while True:

@@ -5,7 +5,7 @@ from src.utils.checklist_strings import eda_crits, eda_docs
 from src.utils.decorators import exception_handler
 from src.utils.generate_doc import main_generate_word
 from src.utils.generate_excel import main_insert_and_sort_xlsx
-from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA
+from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA, EDA_5_WINDOW
 from src.utils.utils import separate_comment
 
 
@@ -29,7 +29,7 @@ def eda_5(data):
         [Gui.Text('Шаблон комментария', size=(16, 1)), Gui.Button('Выбрать', size=(10, 1), key='template')],
         [Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
-    window = Gui.Window('Предварительный просмотр замечаний', layout, grab_anywhere=False, element_justification='c').Finalize()
+    window = Gui.Window(EDA_5_WINDOW, layout, grab_anywhere=False, element_justification='c').Finalize()
 
     templates_active = False
     while True:

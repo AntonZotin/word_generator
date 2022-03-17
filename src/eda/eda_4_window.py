@@ -2,6 +2,7 @@ import PySimpleGUI as Gui
 
 from src.utils.decorators import exception_handler
 from src.eda.eda_5_window import eda_5
+from src.utils.strings import EDA_4_WINDOW
 
 
 @exception_handler
@@ -20,7 +21,7 @@ def eda_4(data):
         [Gui.Text(' ' * 60)],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
-    window = Gui.Window('Сумма понесенных затрат', layout, grab_anywhere=False,
+    window = Gui.Window(EDA_4_WINDOW, layout, grab_anywhere=False,
                         element_justification='c').Finalize()
 
     while True:
