@@ -1,8 +1,8 @@
 import PySimpleGUI as Gui
 
-from src.eda.decorators import exception_handler
+from src.utils.decorators import exception_handler
 from src.eda.eda_1_window import eda_1
-from src.utils import check_proxy
+from src.utils.utils import check_proxy
 
 required_fields = {
     'host': 'Хост',

@@ -2,7 +2,7 @@ from datetime import datetime, date
 
 from openpyxl import load_workbook
 
-from src.strings import XLSX_FILE_SUFFIX, XLSX_NAME, XLSX_PP, XLSX_INN, XLSX_NUMBER, \
+from src.utils.strings import XLSX_FILE_SUFFIX, XLSX_NAME, XLSX_PP, XLSX_INN, XLSX_NUMBER, \
     XLSX_ISPOLNITEL, XLSX_REQUEST_DATE, XLSX_COMMENT, XLSX_SUMM, XLSX_YANDEX, XLSX_DELIVERY, XLSX_CHECK_DATE, \
     XLSX_FILE_EDA, XLSX_FILE_STAVKA
 

@@ -1,12 +1,12 @@
 import PySimpleGUI as Gui
 import pyperclip
 
-from src.checklist_strings import eda_crits, eda_docs
-from src.eda.decorators import exception_handler
-from src.generate_doc import main_generate_word
-from src.generate_excel import main_insert_and_sort_xlsx
-from src.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA
-from src.utils import separate_comment
+from src.utils.checklist_strings import eda_crits, eda_docs
+from src.utils.decorators import exception_handler
+from src.utils.generate_doc import main_generate_word
+from src.utils.generate_excel import main_insert_and_sort_xlsx
+from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA
+from src.utils.utils import separate_comment
 
 
 @exception_handler
@@ -71,7 +71,7 @@ def eda_5(data):
                          background_color='white', size=(660, 500), scrollable=True)],
                 [Gui.Text('', size=(30, 1)), Gui.Submit(button_text='Выбрать', key='Select template'),
                  Gui.Submit(button_text='Закрыть', key='Cancel')]]
-            template_window = Gui.Window('Выбор шаблона', template_layout)
+            template_window = Gui.Window('Выбор шаблона', template_layout, modal=True)
         elif event == 'Сгенерировать':
             comment = values['comment']
             if comment:

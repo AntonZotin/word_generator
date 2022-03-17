@@ -1,7 +1,7 @@
-from src.checklist_strings import eda_crits
-from src.eda.decorators import exception_handler
+from src.utils.checklist_strings import eda_crits
+from src.utils.decorators import exception_handler
 from src.eda.eda_4_window import eda_4
-from src.eda.radio_window import radio_eda
+from src.utils.radio_window import radio_eda
 
 
 @exception_handler

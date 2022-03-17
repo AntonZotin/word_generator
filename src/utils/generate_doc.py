@@ -4,7 +4,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 
-from src.strings import fail_multi, tab, text1, text2, fail_single, \
+from src.utils.strings import fail_multi, tab, text1, text2, fail_single, \
     success, specialists
 
 

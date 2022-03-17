@@ -1,9 +1,9 @@
-from src.checklist_strings import header_max_symbols, text_max_symbols
-from src.strings import COMMENTS_FILE, END_OF_COMMENT
+from src.utils.checklist_strings import header_max_symbols, text_max_symbols
+from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT
 import PySimpleGUI as Gui
 import pyperclip
 
-from src.utils import extract_radio_values
+from src.utils.utils import extract_radio_values
 
 
 def radio_eda(data, radio_dict, title, data_key, next_window):
@@ -124,7 +124,7 @@ def radio_eda(data, radio_dict, title, data_key, next_window):
                          background_color='white', size=(660, 500), scrollable=True)],
                 [Gui.Text('', size=(30, 1)), Gui.Submit(button_text='Выбрать', key=f'Select{index}'),
                  Gui.Submit(button_text='Закрыть', key='Cancel')]]
-            template_window = Gui.Window('Выбор шаблона', template_layout)
+            template_window = Gui.Window('Выбор шаблона', template_layout, modal=True)
         elif event == 'Назад':
             window.close()
             break

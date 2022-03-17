@@ -1,6 +1,6 @@
 import PySimpleGUI as Gui
 
-from src.eda.decorators import exception_handler
+from src.utils.decorators import exception_handler
 from src.eda.eda_5_window import eda_5
 
 

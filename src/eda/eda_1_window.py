@@ -2,11 +2,11 @@ from datetime import datetime
 
 import PySimpleGUI as Gui
 
-from src.checklist_strings import fizik, yurik
-from src.eda.decorators import exception_handler
+from src.utils.checklist_strings import fizik, yurik
+from src.utils.decorators import exception_handler
 from src.eda.eda_2_window import eda_2
-from src.strings import specialists
-from src.utils import search_by_inn
+from src.utils.strings import specialists
+from src.utils.utils import search_by_inn
 
 required_fields = {
     'name': 'Наименование компании',
