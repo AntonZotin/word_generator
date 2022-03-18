@@ -31,9 +31,14 @@ XLSX_DELIVERY = 'I'
 XLSX_ISPOLNITEL = 'J'
 XLSX_CHECK_DATE = 'K'
 
-EDA_0_WINDOW = 'Доступ к прокси'
 EDA_1_WINDOW = 'Общие данные'
 EDA_2_WINDOW = 'Документы обязательные для предоставления'
 EDA_3_WINDOW = 'Требования к заявителям и критерии отбора'
 EDA_4_WINDOW = 'Сумма понесенных затрат'
 EDA_5_WINDOW = 'Предварительный просмотр замечаний'
+TEMPLATE_WINDOW = 'Выбор шаблона'
+
+EXIT = 0
+CLEAR = 100
+SUCCESS = 200
+FAIL = 400

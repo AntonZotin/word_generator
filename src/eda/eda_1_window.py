@@ -3,9 +3,7 @@ from datetime import datetime
 import PySimpleGUI as Gui
 
 from src.utils.checklist_strings import fizik, yurik
-from src.utils.decorators import exception_handler
-from src.eda.eda_2_window import eda_2
-from src.utils.strings import specialists, EDA_1_WINDOW
+from src.utils.strings import specialists, EDA_1_WINDOW, SUCCESS, FAIL
 from src.utils.utils import search_by_inn
 
 required_fields = {
@@ -20,9 +18,9 @@ required_fields = {
 numeric_fields = ['inn', 'number']
 
 
-def insert_name(inn, host, login, password, prefix, window):
+def insert_name(inn, prefix, window):
     try:
-        name = search_by_inn(inn, host, login, password).get('n')
+        name = search_by_inn(inn).get('n')
     except Exception as e:
         Gui.popup(e.args[0], title='Ошибка запроса к ЕГРЮЛ')
         name = None
@@ -32,8 +30,7 @@ def insert_name(inn, host, login, password, prefix, window):
         Gui.popup('Данные от ЕГРЮЛ отсутствуют.', title='Пустые поля')
 
 
-@exception_handler
-def eda_1(data):
+def get_eda_1_window():
     now = datetime.now()
     string_now = now.strftime('%d.%m.%Y')
     layout = [
@@ -43,72 +40,55 @@ def eda_1(data):
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
         [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(16, 1), key='request_date', enable_events=True),
-         Gui.CalendarButton('Календарь',  target='request_date', default_date_m_d_y=(now.month, now.day, now.year),
+         Gui.CalendarButton('Календарь', target='request_date', default_date_m_d_y=(now.month, now.day, now.year),
                             format="%d.%m.%Y")],
         [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
         [Gui.Text('Исполнитель', size=(20, 1)), Gui.Combo([*specialists.keys()], size=(40, 1),
                                                           readonly=True, key='ispolnitel')],
         [Gui.Text('Дата проверки', size=(20, 1)), Gui.Input(size=(16, 1), key='check_date', enable_events=True,
                                                             default_text=string_now),
-         Gui.CalendarButton('Календарь',  target='check_date', default_date_m_d_y=(now.month, now.day, now.year),
+         Gui.CalendarButton('Календарь', target='check_date', default_date_m_d_y=(now.month, now.day, now.year),
                             format="%d.%m.%Y")],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
-    window = Gui.Window(EDA_1_WINDOW, layout, grab_anywhere=False, size=(400, 240),
-                        element_justification='c').Finalize()
+    return Gui.Window(EDA_1_WINDOW, layout, grab_anywhere=False, size=(400, 240),
+                      element_justification='c').Finalize()
 
-    while True:
-        event, values = window.read(timeout=100)
-        if event in (None, 'Exit', 'Cancel', 'Закрыть'):
-            return 0
-        elif event == 'Назад':
-            window.close()
-            break
-        elif event in numeric_fields and values[event] and values[event][-1] not in '0123456789':
+
+def eda_1_event(window, event, values):
+    if event in numeric_fields and values[event] and values[event][-1] not in '0123456789':
+        window[event].update(values[event][:-1])
+    elif event == 'inn' and values[event]:
+        if len(values[event]) == 10 and values[yurik]:
+            insert_name(values[event], '', window)
+        elif len(values[event]) == 12 and values[fizik]:
+            insert_name(values[event], 'ИП ', window)
+    elif (event == 'request_date' or event == 'check_date') and values[event]:
+        if len(values[event]) == 2 or len(values[event]) == 5:
+            window[event].update(values[event] + '.')
+        elif len(values[event]) == 11:
             window[event].update(values[event][:-1])
-        elif event == 'inn' and values[event]:
-            if len(values[event]) == 10 and values[yurik]:
-                insert_name(values[event], data['host'], data['login'], data['password'], '', window)
-            elif len(values[event]) == 12 and values[fizik]:
-                insert_name(values[event], data['host'], data['login'], data['password'], 'ИП ', window)
-        elif (event == 'request_date' or event == 'check_date') and values[event]:
-            if len(values[event]) == 2 or len(values[event]) == 5:
-                window[event].update(values[event] + '.')
-            elif len(values[event]) == 11:
-                window[event].update(values[event][:-1])
-            window['number'].update(values[event].replace('.', ''))
-        elif event == 'Далее':
-            result = {
-                'name': values['name'],
-                'inn': values['inn'],
-                'number': values['number'],
-                'request_date': values['request_date'],
-                'type': fizik if values[fizik] is True else yurik,
-                'ispolnitel': values['ispolnitel'],
-                'check_date': values['check_date'],
-            }
-            required_errors = []
-            if not values['inn']: required_errors.append(required_fields['inn'])
-            if not values['name']: required_errors.append(required_fields['name'])
-            if not values['number']: required_errors.append(required_fields['number'])
-            if not values['request_date']: required_errors.append(required_fields['request_date'])
-            if not values['ispolnitel']: required_errors.append(required_fields['ispolnitel'])
-            if not values['check_date']: required_errors.append(required_fields['check_date'])
+        window['number'].update(values[event].replace('.', ''))
+    elif event == 'Далее':
+        result = {
+            'name': values['name'],
+            'inn': values['inn'],
+            'number': values['number'],
+            'request_date': values['request_date'],
+            'type': fizik if values[fizik] is True else yurik,
+            'ispolnitel': values['ispolnitel'],
+            'check_date': values['check_date'],
+        }
+        required_errors = []
+        if not values['inn']: required_errors.append(required_fields['inn'])
+        if not values['name']: required_errors.append(required_fields['name'])
+        if not values['number']: required_errors.append(required_fields['number'])
+        if not values['request_date']: required_errors.append(required_fields['request_date'])
+        if not values['ispolnitel']: required_errors.append(required_fields['ispolnitel'])
+        if not values['check_date']: required_errors.append(required_fields['check_date'])
 
-            if not required_errors:
-                window.hide()
-                res = eda_2(result)
-                if res == 'back':
-                    window[fizik].update(True)
-                    window[yurik].update(False)
-                    window['inn'].update('')
-                    window['name'].update('')
-                    window['number'].update('')
-                    window['request_date'].update('')
-                    window['ispolnitel'].update('')
-                    window['check_date'].update('')
-                elif res == 0:
-                    return 0
-                window.un_hide()
-            else:
-                Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
+        if not required_errors:
+            return SUCCESS, result
+        else:
+            Gui.popup('Вы не ввели обязательные поля:\n%s' % ', '.join(required_errors), title='Пустые поля')
+            return FAIL, None

@@ -1,6 +1,6 @@
 import sys
 
-from src.eda.eda_0_window import proxy_window
+from src.eda.pool_eda import pool_eda
 
 if __name__ == '__main__':
-    sys.exit(proxy_window())
+    sys.exit(pool_eda())

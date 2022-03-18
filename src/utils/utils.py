@@ -4,35 +4,19 @@ import requests
 from requests.auth import HTTPProxyAuth
 
 
-def search_by_inn(inn, host, login, password):
-    auth_url = f'http://Govtatar%5C{login}:{password}@{host}'
+def search_by_inn(inn):
+    auth_url = f'http://Govtatar%5CElena.Zotina:12345qwerty@i.tatar.ru:8080'
     s = requests.Session()
     s.proxies = {
         "http": auth_url,
         "https": auth_url
     }
-    s.auth = HTTPProxyAuth(f'Govtatar\\{login}', password)
+    s.auth = HTTPProxyAuth('Govtatar\\Elena.Zotina', '12345qwerty')
     s.trust_env = False
     res = s.post("https://egrul.nalog.ru/", data={"query": inn}).json()
     code = res['t']
     res2 = s.get(f'https://egrul.nalog.ru/search-result/{code}').json().get('rows', [])
     return res2[0] if len(res2) else {}
-
-
-def check_proxy(host, login, password):
-    auth_url = f'http://Govtatar%5C{login}:{password}@{host}'
-    s = requests.Session()
-    s.proxies = {
-        "http": auth_url,
-        "https": auth_url
-    }
-    s.auth = HTTPProxyAuth(f'Govtatar\\{login}', password)
-    s.trust_env = False
-    res = s.get("https://google.com")
-    if res.status_code == 200:
-        return res.text, 200
-    else:
-        return str(res.content), res.status_code
 
 
 def extract_radio_values(values, radios):
