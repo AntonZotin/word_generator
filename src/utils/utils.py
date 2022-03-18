@@ -5,28 +5,32 @@ from requests.auth import HTTPProxyAuth
 
 
 def search_by_inn(inn, host, login, password):
-    auth = HTTPProxyAuth(login, password)
-    proxy = {
-        'http': host,
-        'https': host
+    auth_url = f'http://Govtatar%5C{login}:{password}@{host}'
+    s = requests.Session()
+    s.proxies = {
+        "http": auth_url,
+        "https": auth_url
     }
-    res = requests.post("https://egrul.nalog.ru/", proxies=proxy, auth=auth, data={"query": inn}).json()
+    s.auth = HTTPProxyAuth(f'Govtatar\\{login}', password)
+    s.trust_env = False
+    res = s.post("https://egrul.nalog.ru/", data={"query": inn}).json()
     code = res['t']
-    res2 = requests.get(f'https://egrul.nalog.ru/search-result/{code}', proxies=proxy, auth=auth).json().get('rows', [])
+    res2 = s.get(f'https://egrul.nalog.ru/search-result/{code}').json().get('rows', [])
     return res2[0] if len(res2) else {}
 
 
 def check_proxy(host, login, password):
-    auth = HTTPProxyAuth(login, password)
-    proxy = {
-        'http': host,
-        'https': host
+    auth_url = f'http://Govtatar%5C{login}:{password}@{host}'
+    s = requests.Session()
+    s.proxies = {
+        "http": auth_url,
+        "https": auth_url
     }
-    res = requests.get("https://www.mulesoft.com/pw/prod/oneTrustv2/consent/04856e97-6bf2-42aa-9a14-8122a16ebcf2"
-                       "/9271b9d0-7992-4364-9721-eac93d9415b0/en.json",
-                       proxies=proxy, auth=auth)
+    s.auth = HTTPProxyAuth(f'Govtatar\\{login}', password)
+    s.trust_env = False
+    res = s.get("https://google.com")
     if res.status_code == 200:
-        return res.json(), 200
+        return res.text, 200
     else:
         return str(res.content), res.status_code
 

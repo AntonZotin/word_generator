@@ -1,3 +1,5 @@
+import traceback
+
 import PySimpleGUI as Gui
 
 from src.utils.decorators import exception_handler
@@ -15,7 +17,7 @@ required_fields = {
 @exception_handler
 def proxy_window():
     layout = [
-        [Gui.Text('Хост', size=(5, 1)), Gui.InputText(size=(42, 1), key='host', default_text='http://i.tatar.ru:8080')],
+        [Gui.Text('Хост', size=(5, 1)), Gui.InputText(size=(42, 1), key='host', default_text='i.tatar.ru:8080')],
         [Gui.Text('Логин', size=(5, 1)), Gui.InputText(size=(42, 1), key='login')],
         [Gui.Text('Пароль', size=(5, 1)), Gui.InputText(size=(42, 1), key='password')],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Проверить')]
@@ -31,8 +33,12 @@ def proxy_window():
             window.close()
             break
         elif event == 'Проверить':
-            res, status = check_proxy(values['host'], values['login'], values['password'])
-            Gui.popup(res, title=f'Статус {status}')
+            try:
+                res, status = check_proxy(values['host'], values['login'], values['password'])
+                Gui.popup('Проверка прошла успешно', title=f'Статус {status}')
+            except Exception as e:
+                tb = traceback.format_exc()
+                Gui.popup_error(f'An error happened. Here is the info:', e, tb)
         elif event == 'Далее':
             result = {
                 'host': values['host'],
