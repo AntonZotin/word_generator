@@ -6,7 +6,7 @@ from src.utils.strings import SUCCESS
 from src.utils.utils import extract_radio_values
 
 
-def get_radio_eda(zayavitel_type, radio_dict, title):
+def get_radio_eda(data, radio_dict, title):
     arr = []
     radios = {}
     index = 1
@@ -18,7 +18,7 @@ def get_radio_eda(zayavitel_type, radio_dict, title):
                           font=("Helvetica", 18), relief=Gui.RELIEF_RIDGE)],
                 [Gui.Text('-' * 230)]
             ]
-        elif zayavitel_type in perm:
+        elif data['type'] in perm:
             c = c.replace('\\n', '\n')
             height = int(len(c) / text_max_symbols)
             height += int(c.count('\n') / 5)
@@ -61,7 +61,7 @@ def get_radio_eda(zayavitel_type, radio_dict, title):
     return window
 
 
-def radio_eda(window, event, values, radios):
+def radio_eda(window, event, values, radios, key):
     if 'RADIO' in str(event):
         res = event.replace('RADIO', '').split('-')
         if res[1] == 'yes' or res[1] == 'yeah':
@@ -89,4 +89,4 @@ def radio_eda(window, event, values, radios):
         index = event.replace('Вставить в ', '')
         window[f'TEXT{index}'].update(values[f'TEXT{index}'] + pyperclip.paste())
     elif event == 'Далее':
-        return SUCCESS, extract_radio_values(values, radios)
+        return SUCCESS, {key: extract_radio_values(values, radios)}

@@ -8,19 +8,19 @@ from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA, EDA_
 from src.utils.utils import separate_comment
 
 
-def get_eda_5_window(error_docs, error_crits):
+def get_eda_5_window(data):
     init_text = ""
     count = 1
-    for d in error_docs:
+    for d in data['error_docs']:
         init_text += f"{count}. {d}\n"
         count += 1
-    for c in error_crits:
+    for c in data['error_crits']:
         init_text += f"{count}. {c}\n"
         count += 1
     right = ["right_menu", ["Копировать", "Вставить"]]
     layout = [
         [Gui.Text('Комментарий', size=(10, 1)),
-         Gui.Multiline(size=(80, 30), key='comment', disabled=False, right_click_menu=right, default_text=init_text)],
+         Gui.Multiline(size=(80, 30), key='TEXT0', disabled=False, right_click_menu=right, default_text=init_text)],
         [Gui.Text('Шаблон комментария', size=(16, 1)), Gui.Button('Выбрать', size=(10, 1), key='TEMPLATE0')],
         [Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад'),
          Gui.Submit(button_text='Сбросить все')]
@@ -28,15 +28,18 @@ def get_eda_5_window(error_docs, error_crits):
     return Gui.Window(EDA_5_WINDOW, layout, grab_anywhere=False, element_justification='c').Finalize()
 
 
-def eda_5_event(window, event, values, comments_array):
+def eda_5_event(window, event, values, data):
     if event == "Копировать":
-        pyperclip.copy(window['comment'].Widget.selection_get())
+        pyperclip.copy(window['TEXT0'].Widget.selection_get())
     elif event == "Вставить":
-        window['comment'].update(values['comment'] + pyperclip.paste())
+        window['TEXT0'].update(values['TEXT0'] + pyperclip.paste())
     elif event == 'Сгенерировать':
-        data = {}
-        comment = values['comment']
+        comment = values['TEXT0']
         if comment:
+            with open(COMMENTS_FILE, 'r+') as t:
+                comments_file = t.read().strip()
+                comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
+                    END_OF_COMMENT))) if comments_file else set()
             docs = [d for d, _, _ in eda_docs]
             crits = [c for c, _, _ in eda_crits]
             for c in separate_comment(comment):
@@ -63,4 +66,4 @@ def eda_5_event(window, event, values, comments_array):
 
         if success:
             Gui.popup('Заключение успешно сгенерировано.', title='Успешно')
-            return CLEAR, None
+            return CLEAR

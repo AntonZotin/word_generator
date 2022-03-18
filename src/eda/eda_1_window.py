@@ -40,22 +40,20 @@ def get_eda_1_window():
         [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
         [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(16, 1), key='request_date', enable_events=True),
-         Gui.CalendarButton('Календарь', target='request_date', default_date_m_d_y=(now.month, now.day, now.year),
-                            format="%d.%m.%Y")],
+         Gui.Button('Календарь', key='request_date_button')],
         [Gui.Text('Номер заявки', size=(20, 1)), Gui.Input(size=(42, 1), key='number', enable_events=True)],
         [Gui.Text('Исполнитель', size=(20, 1)), Gui.Combo([*specialists.keys()], size=(40, 1),
                                                           readonly=True, key='ispolnitel')],
         [Gui.Text('Дата проверки', size=(20, 1)), Gui.Input(size=(16, 1), key='check_date', enable_events=True,
                                                             default_text=string_now),
-         Gui.CalendarButton('Календарь', target='check_date', default_date_m_d_y=(now.month, now.day, now.year),
-                            format="%d.%m.%Y")],
+         Gui.Button('Календарь', key='check_date_button')],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
     return Gui.Window(EDA_1_WINDOW, layout, grab_anywhere=False, size=(400, 240),
                       element_justification='c').Finalize()
 
 
-def eda_1_event(window, event, values):
+def eda_1_event(window, event, values, data):
     if event in numeric_fields and values[event] and values[event][-1] not in '0123456789':
         window[event].update(values[event][:-1])
     elif event == 'inn' and values[event]:
@@ -63,6 +61,17 @@ def eda_1_event(window, event, values):
             insert_name(values[event], '', window)
         elif len(values[event]) == 12 and values[fizik]:
             insert_name(values[event], 'ИП ', window)
+    elif event == 'request_date_button':
+        date = Gui.popup_get_date(no_titlebar=False, close_when_chosen=True)
+        if date:
+            month, day, year = date
+            window['request_date'].update(f"{day:0>2d}.{month:0>2d}.{year}")
+            window['number'].update(f"{day:0>2d}{month:0>2d}{year}")
+    elif event == 'check_date_button':
+        date = Gui.popup_get_date(no_titlebar=False, close_when_chosen=True)
+        if date:
+            month, day, year = date
+            window['check_date'].update(f"{day:0>2d}.{month:0>2d}.{year}")
     elif (event == 'request_date' or event == 'check_date') and values[event]:
         if len(values[event]) == 2 or len(values[event]) == 5:
             window[event].update(values[event] + '.')

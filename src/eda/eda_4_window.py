@@ -3,7 +3,7 @@ import PySimpleGUI as Gui
 from src.utils.strings import EDA_4_WINDOW, SUCCESS
 
 
-def get_eda_4_window():
+def get_eda_4_window(data):
     yandex = [[Gui.Text('Яндекс еда')],
               [Gui.Multiline(size=(30, 10), key='yandex', disabled=False)]]
 
@@ -22,7 +22,7 @@ def get_eda_4_window():
                       element_justification='c').Finalize()
 
 
-def eda_4_event(window, event, values):
+def eda_4_event(window, event, values, data):
     if event == 'Далее':
         if not values['summ']:
             Gui.popup('Вы не ввели обязательное поле:\nСумма по заявлению', title='Пустое поле')
