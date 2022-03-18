@@ -2,13 +2,21 @@ import PySimpleGUI as Gui
 
 from src.utils.strings import EDA_4_WINDOW, SUCCESS
 
+yandex_index = 1
+delivery_index = 1
+
 
 def get_eda_4_window(data):
-    yandex = [[Gui.Text('Яндекс еда')],
-              [Gui.Multiline(size=(30, 10), key='yandex', disabled=False)]]
+    global yandex_index, delivery_index
+    yandex_index = 1
+    delivery_index = 1
+    yandex = [[Gui.Text('Яндекс еда'), Gui.Button('+', key='yandex_add')],
+              [Gui.Frame('', [[Gui.InputText(size=(20, 1), key=f'yandex{yandex_index}')]], key='yandex', border_width=0)]]
 
-    delivery = [[Gui.Text('Деливери')],
-                [Gui.Multiline(size=(30, 10), key='delivery', disabled=False)]]
+    delivery = [[Gui.Text('Деливери'), Gui.Button('+', key='delivery_add')],
+                [Gui.Frame('', [[Gui.InputText(size=(20, 1), key=f'delivery{delivery_index}')]], key='delivery', border_width=0)]]
+    yandex_index += 1
+    delivery_index += 1
 
     layout = [
         [Gui.Text('Сумма по заявлению', size=(20, 1)), Gui.InputText(size=(20, 1), key='summ')],
@@ -23,7 +31,14 @@ def get_eda_4_window(data):
 
 
 def eda_4_event(window, event, values, data):
-    if event == 'Далее':
+    global yandex_index, delivery_index
+    if event == 'yandex_add':
+        window.extend_layout(window['yandex'], [[Gui.InputText(size=(20, 1), key=f'yandex{yandex_index}')]])
+        yandex_index += 1
+    elif event == 'delivery_add':
+        window.extend_layout(window['delivery'], [[Gui.InputText(size=(20, 1), key=f'delivery{delivery_index}')]])
+        delivery_index += 1
+    elif event == 'Далее':
         if not values['summ']:
             Gui.popup('Вы не ввели обязательное поле:\nСумма по заявлению', title='Пустое поле')
         else:
@@ -36,26 +51,24 @@ def eda_4_event(window, event, values, data):
                 Gui.popup('Вы ввели не числовое значение:\nСумма по заявлению', title='Ошибка')
             else:
                 data['summ'] = summ
-            if values.get('yandex'):
-                try:
-                    yandex_summ = sum(float(ya.replace(',', '.')) for ya in values['yandex'].split('\n'))
-                except ValueError:
-                    error = True
-                    Gui.popup('Вы ввели не числовое значение:\nЯндекс еда', title='Ошибка')
-                else:
-                    data['yandex'] = yandex_summ
-            else:
-                data['yandex'] = 0.0
-            if values.get('delivery'):
-                try:
-                    delivery_summ = sum(float(ya.replace(',', '.')) for ya in values['delivery'].split('\n'))
-                except ValueError:
-                    error = True
-                    Gui.popup('Вы ввели не числовое значение:\nЯндекс еда', title='Ошибка')
-                else:
-                    data['delivery'] = delivery_summ
-            else:
-                data['delivery'] = 0.0
+
+            data['yandex'] = 0.0
+            for y in range(yandex_index):
+                if values.get(f'yandex{y}'):
+                    try:
+                        data['yandex'] += float(values.get(f'yandex{y}'))
+                    except ValueError:
+                        error = True
+                        Gui.popup('Вы ввели не числовое значение:\nЯндекс еда', title='Ошибка')
+
+            data['delivery'] = 0.0
+            for y in range(delivery_index):
+                if values.get(f'delivery{y}'):
+                    try:
+                        data['delivery'] += float(values.get(f'delivery{y}'))
+                    except ValueError:
+                        error = True
+                        Gui.popup('Вы ввели не числовое значение:\nДеливери', title='Ошибка')
 
             if not error:
                 return SUCCESS, data
