@@ -1,11 +1,11 @@
 import PySimpleGUI as Gui
 import pyperclip
 
-from src.utils.checklist_strings import eda_crits, eda_docs, eda_docs_mapping, eda_crits_mapping
+from src.utils.checklist_strings import eda_docs_mapping, eda_crits_mapping, eda_docs, eda_crits
 from src.utils.generate_doc import main_generate_word
 from src.utils.generate_excel import main_insert_and_sort_xlsx
 from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA, EDA_5_WINDOW, CLEAR
-from src.utils.utils import separate_comment
+from src.utils.utils import separate_comment, find_in_comments
 
 
 def get_eda_5_window(data):
@@ -40,10 +40,13 @@ def eda_5_event(window, event, values, data):
                 comments_file = t.read().strip()
                 comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
                     END_OF_COMMENT))) if comments_file else set()
-            docs = list(eda_docs_mapping)
-            crits = list(eda_crits_mapping.values())
+            docs = [d for d, _, _ in eda_docs]
+            crits = [c for c, _, _ in eda_crits]
+            docs_mapping = list(eda_docs_mapping.values())
+            crits_mapping = list(eda_crits_mapping.values())
             for c in separate_comment(comment):
-                if c not in comments_array and c not in docs and c not in crits:
+                if c not in comments_array and not find_in_comments(c, comments_array) and c not in docs \
+                        and c not in crits and c not in docs_mapping and c not in crits_mapping:
                     with open(COMMENTS_FILE, 'a+', encoding='utf-8') as f:
                         f.write('%s%s\n' % (c, END_OF_COMMENT))
                     comments_array.add(c)

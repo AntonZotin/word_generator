@@ -59,3 +59,11 @@ def filter_key(name):
 
 def separate_comment(comment):
     return [re.sub('^\d+[.)\s+]+', '', c) for c in comment.strip().split('\n')]
+
+
+def find_in_comments(comment, comments_array):
+    for ca in comments_array:
+        pattern = re.compile(ca.replace('/', '|').replace('--', '\d+'))
+        if re.match(pattern, comment):
+            return True
+    return False
