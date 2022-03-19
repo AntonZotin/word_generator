@@ -25,7 +25,7 @@ def search_by_inn(inn, need_proxy):
         return res2[0] if len(res2) else {}
 
 
-def extract_radio_values(values, radios):
+def extract_radio_values(values, radios, radios_mapping):
     grouped = {}
     for k, v in values.items():
         matched = re.match('RADIO(\d+)-(\w+)', k)
@@ -46,10 +46,9 @@ def extract_radio_values(values, radios):
     for gid, g in grouped.items():
         if 'text' in g:
             result.append(g["text"])
-        elif list(g.values()) == [False, False]:
-            result.append(radios[gid])
-        elif g.get('no'):
-            result.append(radios[gid])
+        elif list(g.values()) == [False, False] or g.get('no'):
+            row = radios_mapping[radios[gid]] if radios[gid] in radios_mapping else radios[gid]
+            result.append(row)
     return result
 
 

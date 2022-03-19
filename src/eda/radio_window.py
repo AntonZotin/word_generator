@@ -61,7 +61,7 @@ def get_radio_eda(data, radio_dict, title):
     return window
 
 
-def radio_eda(window, event, values, radios, key):
+def radio_eda(window, event, values, radios, radios_mapping, key):
     if 'RADIO' in str(event):
         res = event.replace('RADIO', '').split('-')
         if res[1] == 'yes' or res[1] == 'yeah':
@@ -89,4 +89,4 @@ def radio_eda(window, event, values, radios, key):
         index = event.replace('Вставить в ', '')
         window[f'TEXT{index}'].update(values[f'TEXT{index}'] + pyperclip.paste())
     elif event == 'Далее':
-        return SUCCESS, {key: extract_radio_values(values, radios)}
+        return SUCCESS, {key: extract_radio_values(values, radios, radios_mapping)}

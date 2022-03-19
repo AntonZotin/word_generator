@@ -1,4 +1,3 @@
-
 import PySimpleGUI as Gui
 
 from src.utils.strings import TEMPLATE_WINDOW, MODAL_CLOSE
@@ -15,10 +14,11 @@ def get_template_window(comments_array, event, p_window, p_values):
     template_layout = [
         [Gui.Col([[Gui.Radio(ca, default=False, group_id='2', key=ca,
                              text_color='black', background_color='white')] for ca in comments_array],
-                 background_color='white', size=(660, 500), scrollable=True)],
-        [Gui.Text('', size=(30, 1)), Gui.Submit(button_text='Выбрать', key=f'Select{index}'),
+                 background_color='white', size=(950, 780), scrollable=True)],
+        [Gui.Submit(button_text='Выбрать', key=f'Select{index}'),
          Gui.Submit(button_text='Закрыть', key='Confirm')]]
-    return Gui.Window(TEMPLATE_WINDOW, template_layout, modal=True).Finalize()
+    return Gui.Window(TEMPLATE_WINDOW, template_layout, modal=True,
+                      element_justification='c').Finalize()
 
 
 def template_event(window, event, values, data):

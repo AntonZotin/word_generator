@@ -1,7 +1,7 @@
 import PySimpleGUI as Gui
 import pyperclip
 
-from src.utils.checklist_strings import eda_crits, eda_docs
+from src.utils.checklist_strings import eda_crits, eda_docs, eda_docs_mapping, eda_crits_mapping
 from src.utils.generate_doc import main_generate_word
 from src.utils.generate_excel import main_insert_and_sort_xlsx
 from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA, EDA_5_WINDOW, CLEAR
@@ -36,15 +36,15 @@ def eda_5_event(window, event, values, data):
     elif event == 'Сгенерировать':
         comment = values['TEXT0']
         if comment:
-            with open(COMMENTS_FILE, 'r+') as t:
+            with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
                 comments_file = t.read().strip()
                 comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
                     END_OF_COMMENT))) if comments_file else set()
-            docs = [d for d, _, _ in eda_docs]
-            crits = [c for c, _, _ in eda_crits]
+            docs = list(eda_docs_mapping)
+            crits = list(eda_crits_mapping.values())
             for c in separate_comment(comment):
                 if c not in comments_array and c not in docs and c not in crits:
-                    with open(COMMENTS_FILE, 'a+') as f:
+                    with open(COMMENTS_FILE, 'a+', encoding='utf-8') as f:
                         f.write('%s%s\n' % (c, END_OF_COMMENT))
                     comments_array.add(c)
             data['comment'] = comment

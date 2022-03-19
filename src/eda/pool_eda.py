@@ -68,6 +68,11 @@ def clear(window_pool):
 @exception_handler
 def pool_eda():
     window_pool = init_windows()
+    # with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
+    #     comments_file = t.read().strip()
+    #     comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
+    #         END_OF_COMMENT))) if comments_file else set()
+    # get_template_window(comments_array, 'TEMPLATE0', None, None)
     result = {}
     while True:
         window, event, values = sg.read_all_windows()
@@ -95,7 +100,7 @@ def pool_eda():
             elif event == 'Confirm':
                 window.close()
             elif event.startswith('TEMPLATE'):
-                with open(COMMENTS_FILE, 'r+') as t:
+                with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
                     comments_file = t.read().strip()
                     comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
                         END_OF_COMMENT))) if comments_file else set()

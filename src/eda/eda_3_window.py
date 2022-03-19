@@ -1,5 +1,5 @@
 from src.eda.radio_window import get_radio_eda, radio_eda
-from src.utils.checklist_strings import eda_crits
+from src.utils.checklist_strings import eda_crits, eda_crits_mapping
 from src.utils.strings import EDA_3_WINDOW
 
 
@@ -19,4 +19,4 @@ def get_eda_3_window(data):
 
 
 def eda_3_event(window, event, values, data):
-    return radio_eda(window, event, values, radios, 'error_crits')
+    return radio_eda(window, event, values, radios, eda_crits_mapping, 'error_crits')
