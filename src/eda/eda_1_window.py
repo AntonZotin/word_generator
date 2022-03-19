@@ -18,9 +18,9 @@ required_fields = {
 numeric_fields = ['inn', 'number']
 
 
-def insert_name(inn, prefix, window):
+def insert_name(inn, prefix, window, need_proxy):
     try:
-        name = search_by_inn(inn).get('n')
+        name = search_by_inn(inn, need_proxy).get('n')
     except Exception as e:
         Gui.popup(e.args[0], title='Ошибка запроса к ЕГРЮЛ')
         name = None
@@ -37,7 +37,8 @@ def get_eda_1_window():
         [Gui.Text('Тип заявителя', size=(20, 1)),
          Gui.Radio(fizik, default=True, group_id='1', key=fizik),
          Gui.Radio(yurik, default=False, group_id='1', key=yurik), Gui.Text('', size=(5, 1))],
-        [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(42, 1), key='inn', enable_events=True)],
+        [Gui.Text('ИНН', size=(20, 1)), Gui.Input(size=(16, 1), key='inn', enable_events=True),
+         Gui.Checkbox('Прокси', default=True, key='proxy')],
         [Gui.Text('Наименование компании', size=(20, 1)), Gui.InputText(size=(42, 1), key='name')],
         [Gui.Text('Дата заявки', size=(20, 1)), Gui.Input(size=(16, 1), key='request_date', enable_events=True),
          Gui.Button('Календарь', key='request_date_button')],
@@ -58,9 +59,9 @@ def eda_1_event(window, event, values, data):
         window[event].update(values[event][:-1])
     elif event == 'inn' and values[event]:
         if len(values[event]) == 10 and values[yurik]:
-            insert_name(values[event], '', window)
+            insert_name(values[event], '', window, values['proxy'])
         elif len(values[event]) == 12 and values[fizik]:
-            insert_name(values[event], 'ИП ', window)
+            insert_name(values[event], 'ИП ', window, values['proxy'])
     elif event == 'request_date_button':
         date = Gui.popup_get_date(no_titlebar=False, close_when_chosen=True)
         if date:
