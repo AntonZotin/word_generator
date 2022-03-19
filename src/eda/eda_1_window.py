@@ -77,7 +77,8 @@ def eda_1_event(window, event, values, data):
             window[event].update(values[event] + '.')
         elif len(values[event]) == 11:
             window[event].update(values[event][:-1])
-        window['number'].update(values[event].replace('.', ''))
+        if event == 'request_date':
+            window['number'].update(values[event].replace('.', ''))
     elif event == 'Далее':
         result = {
             'name': values['name'],
