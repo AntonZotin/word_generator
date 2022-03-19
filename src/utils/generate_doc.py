@@ -5,7 +5,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 
 from src.utils.strings import fail_multi, tab, text1, text2, fail_single, \
-    success, specialists
+    success, specialists, footer
 
 
 def has_comment(data):
@@ -25,7 +25,8 @@ def main_generate_word(data):
     paragraph2 = f'{tab}{text1}{fail if has_comment(data) else success}\t\n' \
         f'{comment if has_comment(data) else ""}\n'
     paragraph3 = f'{specialists[data["ispolnitel"]]}'
-    paragraph4 = f'{text2}\n\n\n'
+    paragraph4 = f'{text2}'
+    paragraph5 = f'{footer}{data["check_date"]}\n\n\n'
 
     document = Document()
 
@@ -41,6 +42,10 @@ def main_generate_word(data):
     obj_charstyle = obj_styles.add_style('Last paragraph', WD_STYLE_TYPE.CHARACTER)
     obj_font = obj_charstyle.font
     obj_font.size = Pt(11)
+    obj_font.name = 'Times New Roman'
+    obj_charstyle = obj_styles.add_style('Footer paragraph', WD_STYLE_TYPE.CHARACTER)
+    obj_font = obj_charstyle.font
+    obj_font.size = Pt(8)
     obj_font.name = 'Times New Roman'
 
     t = document.add_paragraph('')
@@ -62,5 +67,9 @@ def main_generate_word(data):
     p4 = document.add_paragraph('')
     p4.add_run(paragraph4, style='Last paragraph').italic = True
     p4.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    p5 = document.add_paragraph('')
+    p5.add_run(paragraph5, style='Footer paragraph')
+    p5.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
 
     document.save("../%s %s.docx" % (data['name'].replace('\"', '\''), number[-4:]))

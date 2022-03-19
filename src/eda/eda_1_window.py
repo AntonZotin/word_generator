@@ -58,9 +58,9 @@ def eda_1_event(window, event, values, data):
     if event in numeric_fields and values[event] and values[event][-1] not in '0123456789':
         window[event].update(values[event][:-1])
     elif event == 'inn' and values[event]:
-        if len(values[event]) == 10 and values[yurik]:
+        if len(values[event]) == 10 and values[yurik] and not values['name']:
             insert_name(values[event], '', window, values['proxy'])
-        elif len(values[event]) == 12 and values[fizik]:
+        elif len(values[event]) == 12 and values[fizik] and not values['name']:
             insert_name(values[event], 'ИП ', window, values['proxy'])
     elif event == 'request_date_button':
         date = Gui.popup_get_date(no_titlebar=False, close_when_chosen=True)

@@ -45,7 +45,7 @@ def extract_radio_values(values, radios):
     result = []
     for gid, g in grouped.items():
         if 'text' in g:
-            result.append(f'{radios[gid]} ({g["text"]})')
+            result.append(g["text"])
         elif list(g.values()) == [False, False]:
             result.append(radios[gid])
         elif g.get('no'):
