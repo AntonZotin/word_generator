@@ -4,7 +4,7 @@ from docx.enum.style import WD_STYLE_TYPE
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Pt
 
-from src.utils.strings import fail_multi, tab, text1, text2, fail_single, \
+from src.utils.strings import fail_multi, tab, text1, signature, fail_single, \
     success, specialists, footer
 
 
@@ -25,7 +25,7 @@ def main_generate_word(data):
     paragraph2 = f'{tab}{text1}{fail if has_comment(data) else success}\t\n' \
         f'{comment if has_comment(data) else ""}\n'
     paragraph3 = f'{specialists[data["ispolnitel"]]}'
-    paragraph4 = f'{text2}'
+    paragraph4 = f'{signature}'
     paragraph5 = f'{footer}{data["check_date"]}\n\n\n'
 
     document = Document()
