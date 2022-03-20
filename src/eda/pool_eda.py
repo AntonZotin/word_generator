@@ -67,12 +67,12 @@ def clear(window_pool):
 
 @exception_handler
 def pool_eda():
-    window_pool = init_windows()
-    # with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
-    #     comments_file = t.read().strip()
-    #     comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
-    #         END_OF_COMMENT))) if comments_file else set()
-    # get_template_window(comments_array, 'TEMPLATE0', None, None)
+    # window_pool = init_windows()
+    with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
+        comments_file = t.read().strip()
+        comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
+            END_OF_COMMENT))) if comments_file else set()
+    get_template_window(comments_array, 'TEMPLATE0', None, None)
     result = {}
     while True:
         window, event, values = sg.read_all_windows()
@@ -99,6 +99,19 @@ def pool_eda():
                         window_pool[next_name] = create_window_pool[next_name](result)
             elif event == 'Confirm':
                 window.close()
+            elif event.startswith('search'):
+                if values['search']:
+                    comments_array, event, p_window, p_values = event_window_pool[window_title](window, event, values, result)
+                    window.close()
+                    get_template_window(comments_array, event, p_window, p_values, search=values['search'])
+                else:
+                    _, event, p_window, p_values = event_window_pool[window_title](window, event, values, result)
+                    window.close()
+                    with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
+                        comments_file = t.read().strip()
+                        comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
+                            END_OF_COMMENT))) if comments_file else set()
+                    get_template_window(comments_array, event, p_window, p_values)
             elif event.startswith('TEMPLATE'):
                 with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
                     comments_file = t.read().strip()

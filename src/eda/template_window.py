@@ -7,25 +7,36 @@ from src.utils.strings import TEMPLATE_WINDOW, MODAL_CLOSE
 parent_window = None
 parent_values = None
 static_comments_array = []
+index = None
 
 
 def wrap_text(text):
-    if len(text) < 30:
+    if len(text) < 138:
         return text
     else:
-        return '\n'.join(re.findall('.{1,30}', text))
+        result = ''
+        fixed_index = 0
+        for index, c in enumerate(text):
+            if fixed_index >= 130 and c == ' ':
+                result += ' \n'
+                fixed_index = 0
+            else:
+                result += c
+                fixed_index += 1
+        return result
 
 
-def get_template_window(comments_array, event, p_window, p_values):
-    global parent_window, parent_values, static_comments_array
+def get_template_window(comments_array, event, p_window, p_values, search=''):
+    global parent_window, parent_values, static_comments_array, index
     parent_window = p_window
     parent_values = p_values
     static_comments_array = comments_array
     index = event.replace('TEMPLATE', '')
     template_layout = [
-        [Gui.Text('Поиск'), Gui.Input(size=(80, 1), enable_events=True, key='search', pad=(10, 10))],
-        [Gui.Listbox([ca for ca in comments_array], size=(100, 30), enable_events=True, key='comments',
-                     horizontal_scroll=True)],
+        [Gui.Text('Поиск'), Gui.Input(size=(80, 1), enable_events=True, key='search', pad=(10, 10), default_text=search, focus=TrueP)],
+        [Gui.Col([[Gui.Radio(wrap_text(ca), default=False, group_id='2', key=ca,
+                             text_color='black', background_color='white')] for ca in comments_array],
+                 background_color='white', size=(950, 780), scrollable=True, key='comments')],
         [Gui.Submit(button_text='Выбрать', key=f'Select{index}'),
          Gui.Submit(button_text='Закрыть', key='Confirm')]]
     return Gui.Window(TEMPLATE_WINDOW, template_layout, modal=True,
@@ -33,18 +44,22 @@ def get_template_window(comments_array, event, p_window, p_values):
 
 
 def template_event(window, event, values, data):
-    global parent_window
-    if event == 'search':
-        search = values['search']
-        new_values = [sca for sca in static_comments_array if search in sca]
-        window['comments'].update(new_values)
+    global parent_window, index
+    if event.startswith('search'):
+        if values['search']:
+            search = values['search']
+            new_values = [sca for sca in static_comments_array if search in sca]
+            return new_values, f'TEMPLATE{index}', parent_window, parent_values
+        else:
+            return None, f'TEMPLATE{index}', parent_window, parent_values
     elif event.startswith('Select'):
         try:
             index = event.replace('Select', '')
+            tv = list(filter(lambda k: values[k], values.keys()))
             res_comment = parent_values.get(f'TEXT{index}', '')
             if res_comment and not res_comment.endswith('\n'):
                 res_comment += '\n'
-            res_comment += values['comments'][0] + '\n'
+            res_comment += tv[0] + '\n'
             parent_window[f'TEXT{index}'].update(res_comment)
             window.close()
             return MODAL_CLOSE
