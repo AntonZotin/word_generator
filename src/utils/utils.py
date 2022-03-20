@@ -46,7 +46,7 @@ def extract_radio_values(values, radios, radios_mapping):
     for gid, g in grouped.items():
         if 'text' in g:
             result.append(g["text"])
-        elif list(g.values()) == [False, False] or g.get('no'):
+        elif (list(g.values()) == [False, False] and 'maybe' not in g) or g.get('no'):
             row = radios_mapping[radios[gid]] if radios[gid] in radios_mapping else radios[gid]
             result.append(row)
     return result
