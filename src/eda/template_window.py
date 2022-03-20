@@ -32,7 +32,6 @@ def get_template_window(comments_array, event, p_window, p_values):
     static_comments_array = comments_array
     index = event.replace('TEMPLATE', '')
     template_layout = [
-        [Gui.Text('Поиск'), Gui.Input(size=(80, 1), enable_events=True, key='search', pad=(10, 10))],
         [Gui.Col([[Gui.Radio(wrap_text(ca), default=False, group_id='2', key=ca,
                              text_color='black', background_color='white')] for ca in comments_array],
                  background_color='white', size=(950, 780), scrollable=True, key='comments')],
@@ -44,12 +43,7 @@ def get_template_window(comments_array, event, p_window, p_values):
 
 def template_event(window, event, values, data):
     global parent_window
-    if event.startswith('search') and values['search']:
-        search = values['search']
-        new_values = [sca for sca in static_comments_array if search in sca]
-        window['comments'].update([[Gui.Radio(ca, default=False, group_id='2', key=ca,
-                                              text_color='black', background_color='white')] for ca in new_values])
-    elif event.startswith('Select'):
+    if event.startswith('Select'):
         try:
             index = event.replace('Select', '')
             tv = list(filter(lambda k: values[k], values.keys()))
