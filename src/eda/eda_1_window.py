@@ -4,7 +4,7 @@ import PySimpleGUI as Gui
 
 from src.utils.checklist_strings import fizik, yurik
 from src.utils.strings import specialists, EDA_1_WINDOW, SUCCESS, FAIL
-from src.utils.utils import search_by_inn
+from src.utils.utils import search_by_inn, onKeyRelease
 
 required_fields = {
     'name': 'Наименование компании',
@@ -50,8 +50,10 @@ def get_eda_1_window():
          Gui.Button('Календарь', key='check_date_button')],
         [Gui.Submit(button_text='Далее'), Gui.Submit(button_text='Назад'), Gui.Submit(button_text='Сбросить все')]
     ]
-    return Gui.Window(EDA_1_WINDOW, layout, grab_anywhere=False, size=(400, 240),
-                      element_justification='c').Finalize()
+    window = Gui.Window(EDA_1_WINDOW, layout, grab_anywhere=False, size=(400, 240),
+                        element_justification='c').Finalize()
+    window.TKroot.bind_all("<Key>", onKeyRelease, "+")
+    return window
 
 
 def eda_1_event(window, event, values, data):

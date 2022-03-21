@@ -3,7 +3,7 @@ import pyperclip
 
 from src.utils.checklist_strings import header_max_symbols, text_max_symbols
 from src.utils.strings import SUCCESS
-from src.utils.utils import extract_radio_values
+from src.utils.utils import extract_radio_values, onKeyRelease
 
 
 def get_radio_eda(data, radio_dict, title):
@@ -58,6 +58,7 @@ def get_radio_eda(data, radio_dict, title):
                         element_justification='c').Finalize()
     for i in range(1, index):
         window[f'COMMENT{i}'].hide_row()
+    window.TKroot.bind_all("<Key>", onKeyRelease, "+")
     return window
 
 

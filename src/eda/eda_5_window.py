@@ -5,7 +5,7 @@ from src.utils.checklist_strings import eda_docs_mapping, eda_crits_mapping, eda
 from src.utils.generate_doc import main_generate_word
 from src.utils.generate_excel import main_insert_and_sort_xlsx
 from src.utils.strings import COMMENTS_FILE, END_OF_COMMENT, XLSX_FILE_EDA, EDA_5_WINDOW, CLEAR
-from src.utils.utils import separate_comment, find_in_comments
+from src.utils.utils import separate_comment, find_in_comments, onKeyRelease
 
 
 def get_eda_5_window(data):
@@ -25,7 +25,9 @@ def get_eda_5_window(data):
         [Gui.Submit(button_text='Сгенерировать'), Gui.Submit(button_text='Назад'),
          Gui.Submit(button_text='Сбросить все')]
     ]
-    return Gui.Window(EDA_5_WINDOW, layout, grab_anywhere=False, element_justification='c').Finalize()
+    window = Gui.Window(EDA_5_WINDOW, layout, grab_anywhere=False, element_justification='c').Finalize()
+    window.TKroot.bind_all("<Key>", onKeyRelease, "+")
+    return window
 
 
 def eda_5_event(window, event, values, data):
@@ -38,8 +40,8 @@ def eda_5_event(window, event, values, data):
         if comment:
             with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
                 comments_file = t.read().strip()
-                comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
-                    END_OF_COMMENT))) if comments_file else set()
+                comments_array = list(e.strip() for e in filter(lambda el: el, comments_file.split(
+                    END_OF_COMMENT))) if comments_file else list()
             docs = [d for d, _, _ in eda_docs]
             crits = [c for c, _, _ in eda_crits]
             docs_mapping = list(eda_docs_mapping.values())

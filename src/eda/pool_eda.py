@@ -102,8 +102,8 @@ def pool_eda():
             elif event.startswith('TEMPLATE'):
                 with open(COMMENTS_FILE, 'r+', encoding='utf-8') as t:
                     comments_file = t.read().strip()
-                    comments_array = set(e.strip() for e in filter(lambda el: el, comments_file.split(
-                        END_OF_COMMENT))) if comments_file else set()
+                    comments_array = list(e.strip() for e in filter(lambda el: el, comments_file.split(
+                        END_OF_COMMENT))) if comments_file else list()
                 get_template_window(comments_array, event, window, values)
             else:
                 status = event_window_pool[window_title](window, event, values, result)
